@@ -7,5 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class Notification extends Model
 {
     protected $primaryKey = 'notif_id';
-protected $fillable = ['type', 'title', 'message', 'url', 'is_read'];
+protected $fillable = ['user_id','type', 'title', 'message', 'url', 'is_read'];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
+    }
 }

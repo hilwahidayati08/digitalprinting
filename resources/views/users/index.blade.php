@@ -102,13 +102,6 @@
                                     </span>
                                     <div class="flex gap-3">
                                         <div class="flex flex-col">
-                                            <span class="text-[9px] font-black text-gray-400 uppercase tracking-tighter">Rate</span>
-                                            <span class="text-xs font-black text-gray-700 leading-none">
-                                                {{ $user->active_commission_rate }}%
-                                                @if($user->commission_rate_override) <span class="text-orange-500">*</span> @endif
-                                            </span>
-                                        </div>
-                                        <div class="flex flex-col">
                                             <span class="text-[9px] font-black text-gray-400 uppercase tracking-tighter">Total Belanja</span>
                                             <span class="text-xs font-black text-gray-700 leading-none">Rp {{ number_format($user->total_spent, 0, ',', '.') }}</span>
                                         </div>
@@ -120,10 +113,6 @@
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center justify-end gap-1">
-                                <a href="{{ route('users.show', $user->user_id) }}" 
-                                   class="p-2.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all" title="Detail & Commission">
-                                    <i class="fas fa-eye text-sm"></i>
-                                </a>
                                 <a href="{{ route('users.edit', $user->user_id) }}" 
                                    class="p-2.5 text-gray-400 hover:text-amber-500 hover:bg-amber-50 rounded-xl transition-all" title="Edit">
                                     <i class="fas fa-pencil-alt text-sm"></i>
@@ -150,11 +139,8 @@
             </table>
         </div>
 
-        @if($users->hasPages())
-        <div class="px-6 py-4 border-t border-gray-50 bg-gray-50/20">
-            {{ $users->withQueryString()->links() }}
-        </div>
-        @endif
+    @include('partials.admin.pagination', ['paginator' => $users->withQueryString()])
+
     </div>
 </div>
 

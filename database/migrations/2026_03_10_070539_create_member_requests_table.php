@@ -10,9 +10,7 @@ return new class extends Migration {
         Schema::create('member_requests', function (Blueprint $table) {
             $table->id('request_id');
             $table->foreignId('user_id')->constrained('users', 'user_id');
-            $table->enum('status', ['pending', 'approved', 'rejected'])
-                  ->default('pending');
-            $table->text('rejection_reason')->nullable();
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->timestamp('processed_at')->nullable();
             $table->timestamps();
         });

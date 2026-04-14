@@ -11,15 +11,15 @@ return new class extends Migration
      */
 public function up()
 {
-    Schema::create('stock_logs', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('material_id')->constrained('materials', 'material_id')->onDelete('cascade');
-        $table->enum('type', ['in', 'out']); // 'in' (masuk/restock), 'out' (keluar/order)
-        $table->double('amount'); // Jumlah yang berubah
-        $table->double('last_stock'); // Saldo stok terakhir
-        $table->string('description')->nullable(); // Ket: "Order #INV-001" atau "Restock"
-        $table->timestamps();
-    });
+        Schema::create('stock_logs', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('material_id')->constrained('materials', 'material_id')->onDelete('cascade');
+            $table->enum('type', ['in', 'out']); // in = restock, out = order
+            $table->double('amount');             // jumlah yang berubah
+            $table->double('last_stock');         // saldo stok setelah perubahan
+            $table->string('description')->nullable();
+            $table->timestamps();
+        });
 }
 
     /**

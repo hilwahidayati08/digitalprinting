@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Pagination\Paginator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -18,6 +19,7 @@ class AppServiceProvider extends ServiceProvider
      * Bootstrap any application services.
      */
 public function boot() {
+    
     view()->composer('*', function ($view) {
         if (auth()->check() && auth()->user()->role == 'admin') {
             $view->with('countAntrian', \App\Models\Orders::where('status', 'paid')->count());
@@ -25,6 +27,7 @@ public function boot() {
         }
     });
 
-    
+        Paginator::useTailwind(); // pastikan ini ada
+
 }
 }

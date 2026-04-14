@@ -121,5 +121,7 @@
 
         </div>
     </div>
+    @include('partials.admin.pagination', ['paginator' => $items->withQueryString()])
+
 </div>
 @endsection

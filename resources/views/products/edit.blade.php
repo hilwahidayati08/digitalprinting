@@ -98,26 +98,39 @@
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-bold text-gray-700 mb-2">Panjang Bahan (m)</label>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Panjang Bahan (cm)</label>
 <input type="number" step="0.01" name="default_width_cm"
-       value="{{ old('default_width_cm', $product->default_width_cm 
-           ? $product->default_width_cm / 100 
-           : '') }}" required
+       value="{{ old('default_width_cm', $product->default_width_cm) }}" 
        class="w-full px-4 py-2.5 border border-blue-200 rounded-xl text-sm font-bold">
                             </div>
                             <div>
-                                <label class="block text-sm font-bold text-gray-700 mb-2">Lebar Bahan (m)</label>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Lebar Bahan (cm)</label>
 <input type="number" step="0.01" name="default_height_cm"
-       value="{{ old('default_height_cm', $product->default_height_cm 
-           ? $product->default_height_cm / 100 
-           : '') }}" required
+       value="{{ old('default_height_cm', $product->default_height_cm) }}" 
        class="w-full px-4 py-2.5 border border-blue-200 rounded-xl text-sm font-bold">
                             </div>
                         </div>
-                        <p class="text-[10px] text-blue-500 italic font-medium leading-relaxed">
-                            *Setiap 1 unit produk terjual, stok bahan baku akan otomatis berkurang sebanyak <b>(Panjang x Lebar)</b>.
-                        </p>
-                    </div>
+{{-- Checkbox allow custom size --}}
+<div class="flex items-center gap-3 p-3 bg-white/50 rounded-xl border border-blue-100">
+    <input type="checkbox" name="allow_custom_size" value="1" 
+           id="allow_custom_edit"
+           {{ $product->allow_custom_size ? 'checked' : '' }}
+           class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+    <div>
+        <label for="allow_custom_edit" class="text-xs font-bold text-blue-800 uppercase tracking-tighter cursor-pointer">
+            Izinkan Pelanggan Input Ukuran Sendiri
+        </label>
+        <p class="text-[10px] text-blue-400 mt-0.5">
+            Cocok untuk stiker custom, kartu nama ukuran bebas, dll.
+        </p>
+    </div>
+</div>
+
+<p class="text-[10px] text-blue-500 italic font-medium leading-relaxed">
+    *Ukuran default produk dalam CM. Untuk stiker/kartu nama, ini dipakai untuk hitung yield per lembar material.
+</p>
+</div>
+                    
 
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">Harga Jual (Rp)</label>

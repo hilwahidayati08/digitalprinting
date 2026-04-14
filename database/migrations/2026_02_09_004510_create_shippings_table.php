@@ -13,25 +13,17 @@ return new class extends Migration
     {
         Schema::create('shippings', function (Blueprint $table) {
             $table->id('shipping_id');
-
             $table->foreignId('user_id')->constrained('users', 'user_id');
-
-            $table->string('label'); // Rumah, Kantor
+            $table->string('label'); // Rumah, Kantor, dll.
             $table->text('address');
-
-        $table->string('province_id');
-        $table->string('city_id');
-        $table->string('district_id');
-        $table->string('village_id');
-                    // TAMBAH: Data penerima
+            $table->string('province_id');
+            $table->string('city_id');
+            $table->string('district_id');
+            $table->string('village_id');
             $table->string('recipient_name')->nullable();
             $table->string('recipient_phone')->nullable();
-            
-            // TAMBAH: Kode pos
             $table->string('postal_code')->nullable();
-
             $table->boolean('is_default')->default(false);
-
             $table->timestamps();
         });
     }

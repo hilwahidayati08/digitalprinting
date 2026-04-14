@@ -1,381 +1,229 @@
-
 @extends('admin.admin')
 
 @section('title', 'Dashboard - Admin Panel')
 @section('page-title', 'Dashboard')
 
-@section('breadcrumbs')
-    <nav class="flex mb-4" aria-label="Breadcrumb">
-        <ol class="inline-flex items-center space-x-1 md:space-x-3">
-            <li class="inline-flex items-center">
-                <span class="text-sm font-medium text-gray-900">Dashboard</span>
-            </li>
-        </ol>
-    </nav>
-@endsection
-
 @section('content')
 
-<style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;0,9..40,900&family=DM+Mono:wght@400;500&display=swap');
+<div class="space-y-6">
 
-:root {
-    --blue:     #2563eb;
-    --blue-l:   #eff6ff;
-    --blue-m:   #dbeafe;
-    --green:    #16a34a;
-    --green-l:  #f0fdf4;
-    --amber:    #d97706;
-    --amber-l:  #fffbeb;
-    --red:      #dc2626;
-    --red-l:    #fef2f2;
-    --purple:   #7c3aed;
-    --purple-l: #f5f3ff;
-    --ink:      #0f172a;
-    --muted:    #64748b;
-    --border:   #e2e8f0;
-    --surface:  #f8fafc;
-    --card:     #ffffff;
-    --r:        16px;
-    --rs:       10px;
-}
-
-.dash * { font-family: 'DM Sans', sans-serif; box-sizing: border-box; }
-.mono    { font-family: 'DM Mono', monospace !important; }
-
-/* ── PAGE HEADER ── */
-.dash-hdr {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 24px;
-}
-.dash-title { font-size: 24px; font-weight: 900; color: var(--ink); letter-spacing: -.03em; line-height: 1; }
-.dash-sub   { font-size: 12px; color: var(--muted); margin-top: 4px; }
-.dash-date  {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: white; border: 1.5px solid var(--border);
-    border-radius: var(--rs); padding: 7px 14px;
-    font-size: 12px; font-weight: 600; color: var(--muted);
-}
-
-/* ── ALERTS ── */
-.alert-strip { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
-.apill {
-    display: inline-flex; align-items: center; gap: 7px;
-    padding: 6px 14px; border-radius: 999px; font-size: 11px;
-    font-weight: 700; text-decoration: none; border: 1.5px solid;
-    transition: transform .15s, box-shadow .15s;
-}
-.apill:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,.08); }
-.apill.am  { background: var(--amber-l); color: #92400e; border-color: #fde68a; }
-.apill.rd  { background: var(--red-l);   color: #991b1b; border-color: #fecaca; }
-.apill.bl  { background: var(--blue-l);  color: #1e40af; border-color: var(--blue-m); }
-.adot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; animation: blink 1.4s ease-in-out infinite; }
-.adot.am { background: var(--amber); }
-.adot.rd { background: var(--red); }
-.adot.bl { background: var(--blue); }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
-
-/* ── SECTION DIVIDER ── */
-.sec-div {
-    font-size: 10px; font-weight: 800; text-transform: uppercase;
-    letter-spacing: .12em; color: #94a3b8;
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 14px; margin-top: 8px;
-}
-.sec-div::after { content:''; flex:1; height:1px; background: var(--border); }
-
-/* ── KPI GRID ── */
-.kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 22px; }
-@media(max-width:1100px){ .kpi-grid{ grid-template-columns: repeat(2,1fr); } }
-@media(max-width:640px) { .kpi-grid{ grid-template-columns: 1fr; } }
-
-.kpi {
-    background: white;
-    border: 1.5px solid var(--border);
-    border-radius: var(--r);
-    padding: 18px 20px;
-    position: relative; overflow: hidden;
-    transition: transform .2s, box-shadow .2s, border-color .2s;
-}
-.kpi:hover { transform: translateY(-3px); box-shadow: 0 14px 40px -10px rgba(0,0,0,.11); border-color: #c7d2fe; }
-.kpi::before { content:''; position:absolute; left:0;top:0;bottom:0; width:4px; border-radius:4px 0 0 4px; }
-.kpi.bl::before { background:var(--blue); }    .kpi.am::before { background:var(--amber); }
-.kpi.pu::before { background:var(--purple); }  .kpi.gr::before { background:var(--green); }
-.kpi.bl { background: linear-gradient(135deg,#eef5ff,#fff 55%); }
-.kpi.am { background: linear-gradient(135deg,#fffdf0,#fff 55%); }
-.kpi.pu { background: linear-gradient(135deg,#faf5ff,#fff 55%); }
-.kpi.gr { background: linear-gradient(135deg,#f0fdf7,#fff 55%); }
-
-.kpi-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:14px; }
-.kpi-ico { width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:15px; }
-.kpi-ico.bl { background:#dbeafe; color:var(--blue); }
-.kpi-ico.am { background:#fef3c7; color:var(--amber); }
-.kpi-ico.pu { background:#ede9fe; color:var(--purple); }
-.kpi-ico.gr { background:#dcfce7; color:var(--green); }
-
-.kbadge { display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:999px;font-size:10px;font-weight:800; }
-.kbadge.up   { background:#dcfce7; color:#166534; }
-.kbadge.dn   { background:#fee2e2; color:#991b1b; }
-.kbadge.neu  { background:#fef3c7; color:#92400e; }
-
-.kpi-lbl  { font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:3px; }
-.kpi-val  { font-size:21px;font-weight:900;color:var(--ink);letter-spacing:-.02em;line-height:1;margin-bottom:4px; }
-.kpi-hint { font-size:11px;color:#94a3b8; }
-.kpi-hint b { color:#475569; }
-
-/* ── PANEL ── */
-.panel { background:white;border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden; }
-.ph {
-    display:flex;align-items:center;justify-content:space-between;
-    padding:16px 20px; border-bottom:1px solid #f1f5f9;
-}
-.ph-l { display:flex;align-items:center;gap:11px; }
-.pico { width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0; }
-.pico.bl  { background:#dbeafe;color:var(--blue); }   .pico.am  { background:#fef3c7;color:var(--amber); }
-.pico.gr  { background:#dcfce7;color:var(--green); }  .pico.pu  { background:#ede9fe;color:var(--purple); }
-.pico.rd  { background:#fee2e2;color:var(--red); }
-
-.ptitle { font-size:13px;font-weight:800;color:var(--ink); }
-.pdesc  { font-size:11px;color:#94a3b8;margin-top:1px; }
-.plink  { font-size:11px;font-weight:700;color:var(--blue);text-decoration:none;padding:4px 11px;background:var(--blue-l);border-radius:999px;transition:background .15s;white-space:nowrap; }
-.plink:hover { background:var(--blue-m); }
-.pbody  { padding:18px 20px; }
-
-/* ── GRIDS ── */
-.g2 { display:grid;grid-template-columns:1fr 320px;gap:14px;margin-bottom:22px; }
-.g3 { display:grid;grid-template-columns:1fr 1fr 320px;gap:14px;margin-bottom:22px; }
-@media(max-width:1100px){ .g2,.g3{ grid-template-columns:1fr; } }
-
-/* ── CHART ── */
-.chart-outer { display:flex;align-items:flex-end;gap:8px;height:155px;padding:0 2px; }
-.chart-col   { flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end; }
-.chart-bw    { width:100%;flex:1;display:flex;align-items:flex-end;justify-content:center; }
-.chart-bar   {
-    width:100%;max-width:40px;border-radius:7px 7px 0 0;
-    background:linear-gradient(180deg,#60a5fa,#2563eb);
-    transition:all .25s; cursor:pointer; position:relative; min-height:4px;
-}
-.chart-bar:hover { background:linear-gradient(180deg,#93c5fd,#3b82f6); }
-.ctt {
-    position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
-    background:var(--ink);color:white;font-size:10px;font-weight:700;
-    padding:3px 8px;border-radius:5px;white-space:nowrap;
-    opacity:0;pointer-events:none;transition:opacity .15s;
-}
-.chart-bar:hover .ctt { opacity:1; }
-.chart-mo  { font-size:10px;font-weight:700;color:#94a3b8; }
-.chart-cnt { font-size:9px;color:#cbd5e1; }
-
-/* ── STATUS BARS ── */
-.srow { display:flex;align-items:center;gap:10px;margin-bottom:12px; }
-.slabel { display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#475569;width:76px;flex-shrink:0; }
-.sdot   { width:8px;height:8px;border-radius:3px;flex-shrink:0; }
-.strack { flex:1;height:7px;background:#f1f5f9;border-radius:999px;overflow:hidden; }
-.sfill  { height:100%;border-radius:999px;transition:width .6s cubic-bezier(.34,1.56,.64,1); }
-.scnt   { font-size:12px;font-weight:800;color:var(--ink);width:26px;text-align:right;flex-shrink:0; }
-
-/* ── TABLE ── */
-.dtable { width:100%;border-collapse:collapse; }
-.dtable th {
-    padding:9px 16px;font-size:10px;font-weight:800;text-transform:uppercase;
-    letter-spacing:.08em;color:#94a3b8;text-align:left;
-    background:#f8fafc;border-bottom:1px solid var(--border);
-}
-.dtable td { padding:11px 16px;font-size:12px;color:#475569;border-bottom:1px solid #f8fafc;vertical-align:middle; }
-.dtable tr:last-child td { border-bottom:none; }
-.dtable tr:hover td { background:#f8fafc; }
-.oid  { font-family:'DM Mono',monospace;font-size:10px;color:#94a3b8; }
-.onam { font-weight:700;color:var(--ink);font-size:12px; }
-.oamt { font-family:'DM Mono',monospace;font-weight:700;color:var(--ink); }
-
-.badge2 { display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:999px;font-size:10px;font-weight:800;border:1px solid; }
-.badge2.ok  { background:#f0fdf4;color:#166534;border-color:#bbf7d0; }
-.badge2.pr  { background:#eff6ff;color:#1e40af;border-color:var(--blue-m); }
-.badge2.pe  { background:#fffbeb;color:#92400e;border-color:#fde68a; }
-.badge2.ca  { background:#fef2f2;color:#991b1b;border-color:#fecaca; }
-
-/* ── TOP PRODUCTS ── */
-.trow { display:flex;align-items:center;gap:10px;margin-bottom:14px; }
-.trow:last-child { margin-bottom:0; }
-.rbadge { width:27px;height:27px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;flex-shrink:0;border:1.5px solid; }
-.r1 { background:#fef9c3;color:#854d0e;border-color:#fde68a; }
-.r2 { background:#f1f5f9;color:#475569;border-color:#cbd5e1; }
-.r3 { background:#fff7ed;color:#9a3412;border-color:#fed7aa; }
-.r4,.r5 { background:#f8fafc;color:#94a3b8;border-color:var(--border); }
-.tname  { font-size:12px;font-weight:700;color:var(--ink);line-height:1.3; }
-.ttrack { height:4px;background:#f1f5f9;border-radius:999px;overflow:hidden;margin-top:4px; }
-.tfill  { height:100%;border-radius:999px;background:linear-gradient(90deg,#a78bfa,#7c3aed); }
-.tcnt   { font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:#64748b;flex-shrink:0; }
-
-/* ── RATING ── */
-.rstar { font-size:18px; }
-.rstar.on { color:#f59e0b; } .rstar.off { color:#e2e8f0; }
-.rbrow { display:flex;align-items:center;gap:5px;margin-bottom:5px; }
-.rbtrack { flex:1;height:5px;background:#f1f5f9;border-radius:999px;overflow:hidden; }
-.rbfill  { height:100%;border-radius:999px;background:linear-gradient(90deg,#fde68a,#f59e0b); }
-
-/* ── FIN TILES ── */
-.fg { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px; }
-.ft { border-radius:11px;padding:13px 15px;border:1.5px solid; }
-.ft.gr { background:var(--green-l);border-color:#bbf7d0; }
-.ft.rd { background:var(--red-l);border-color:#fecaca; }
-.ft.bl { background:var(--blue-l);border-color:var(--blue-m); }
-.ft-lbl { font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px; }
-.ft.gr .ft-lbl { color:var(--green); }  .ft.rd .ft-lbl { color:var(--red); }  .ft.bl .ft-lbl { color:var(--blue); }
-.ft-val { font-size:15px;font-weight:900;font-family:'DM Mono',monospace; }
-.ft.gr .ft-val { color:#166534; }  .ft.rd .ft-val { color:#991b1b; }  .ft.bl .ft-val { color:#1e40af; }
-
-/* ── SUMMARY TILES ── */
-.sg { display:grid;grid-template-columns:repeat(3,1fr);gap:8px; }
-.st {
-    border-radius:11px;padding:13px 8px;text-align:center;border:1.5px solid;
-    text-decoration:none;transition:transform .15s,box-shadow .15s;display:block;
-}
-.st:hover { transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.07); }
-.sv { font-size:20px;font-weight:900;letter-spacing:-.02em;line-height:1; }
-.sn { font-size:10px;font-weight:700;margin-top:3px; }
-
-/* ── ANIMATION ── */
-.fu { opacity:0;transform:translateY(14px);animation:fadeUp .4s ease forwards; }
-@keyframes fadeUp { to { opacity:1;transform:translateY(0); } }
-.fu:nth-child(1){animation-delay:.04s} .fu:nth-child(2){animation-delay:.08s}
-.fu:nth-child(3){animation-delay:.12s} .fu:nth-child(4){animation-delay:.16s}
-</style>
-
-<div class="dash">
-
-    {{-- PAGE HEADER --}}
-    <div class="dash-hdr">
+    {{-- ═══════════════════════════════════════
+         PAGE HEADER
+    ═══════════════════════════════════════ --}}
+    <div class="flex flex-wrap items-end justify-between gap-3">
         <div>
-            <div class="dash-title">Dashboard</div>
-            <div class="dash-sub">Selamat datang kembali — berikut ringkasan bisnis Anda hari ini.</div>
+            <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight leading-none">Dashboard</h1>
+            <p class="text-xs text-gray-400 mt-1">Selamat datang kembali — berikut ringkasan bisnis Anda hari ini.</p>
         </div>
-        <div class="dash-date">
-            <i class="fas fa-calendar-alt"></i>
+        <div class="inline-flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2 text-xs font-semibold text-gray-500 shadow-sm">
+            <i class="fas fa-calendar-alt text-blue-400"></i>
             <span id="live-date"></span>
         </div>
     </div>
 
-    {{-- ALERTS --}}
-    @if($pendingOrders > 0 || $lowStockProducts > 0 || $pendingWithdrawals > 0 || $pendingMemberRequests > 0)
-    <div class="alert-strip">
-        @if($pendingOrders > 0)
-        <a href="{{ route('orders.index') }}" class="apill am">
-            <span class="adot am"></span> {{ $pendingOrders }} Pesanan Menunggu Konfirmasi
-        </a>
-        @endif
-        @if($lowStockProducts > 0)
-        <a href="{{ route('products.index') }}" class="apill rd">
-            <span class="adot rd"></span> {{ $lowStockProducts }} Produk Stok Menipis
-        </a>
-        @endif
-        @if($pendingWithdrawals > 0)
-        <a href="" class="apill am">
-            <span class="adot am"></span> {{ $pendingWithdrawals }} Withdrawal Menunggu
-        </a>
-        @endif
-        @if($pendingMemberRequests > 0)
-        <a href="{{ route('member-requests.index') }}" class="apill bl">
-            <span class="adot bl"></span> {{ $pendingMemberRequests }} Member Request Baru
-        </a>
-        @endif
-    </div>
-    @endif
+    {{-- ═══════════════════════════════════════
+         ALERT PILLS
+    ═══════════════════════════════════════ --}}
+    {{-- @if($pendingOrders > 0 || $lowStockProducts > 0 || $lowStockMaterialsCount > 0 || $pendingWithdrawals > 0 || $pendingMemberRequests > 0)
+    <div class="flex flex-wrap gap-2">
 
-    {{-- KPI CARDS --}}
-    <div class="kpi-grid">
+        @if($lowStockMaterialsCount > 0)
+        <a href="{{ route('materials.index') }}"
+           class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold border border-red-200 bg-red-50 text-red-800 hover:-translate-y-0.5 hover:shadow-md transition-all">
+            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+            <i class="fas fa-exclamation-triangle"></i>
+            {{ $lowStockMaterialsCount }} Bahan Baku Hampir Habis
+        </a>
+        @endif
+
+        @if($pendingOrders > 0)
+        <a href="{{ route('admin.orders.index') }}"
+           class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold border border-amber-200 bg-amber-50 text-amber-800 hover:-translate-y-0.5 hover:shadow-md transition-all">
+            <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+            <i class="fas fa-shopping-bag"></i>
+            {{ $pendingOrders }} Pesanan Menunggu Konfirmasi
+        </a>
+        @endif
+
+        @if($lowStockProducts > 0)
+        <a href="{{ route('products.index') }}"
+           class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold border border-red-200 bg-red-50 text-red-800 hover:-translate-y-0.5 hover:shadow-md transition-all">
+            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+            <i class="fas fa-box"></i>
+            {{ $lowStockProducts }} Produk Stok Menipis
+        </a>
+        @endif
+
+        @if($pendingWithdrawals > 0)
+        <a href="#"
+           class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold border border-amber-200 bg-amber-50 text-amber-800 hover:-translate-y-0.5 hover:shadow-md transition-all">
+            <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+            <i class="fas fa-money-bill-wave"></i>
+            {{ $pendingWithdrawals }} Withdrawal Menunggu
+        </a>
+        @endif
+
+        @if($pendingMemberRequests > 0)
+        <a href="{{ route('member-requests.index') }}"
+           class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold border border-blue-200 bg-blue-50 text-blue-800 hover:-translate-y-0.5 hover:shadow-md transition-all">
+            <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+            <i class="fas fa-user-plus"></i>
+            {{ $pendingMemberRequests }} Member Request Baru
+        </a>
+        @endif
+
+    </div>
+    @endif --}}
+
+    {{-- ═══════════════════════════════════════
+         KPI CARDS
+    ═══════════════════════════════════════ --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+
         {{-- Revenue --}}
-        <div class="kpi bl fu">
-            <div class="kpi-top">
-                <div class="kpi-ico bl"><i class="fas fa-chart-line"></i></div>
+        <div class="relative bg-gradient-to-br from-blue-50 to-white border border-gray-200 rounded-2xl p-5 overflow-hidden hover:-translate-y-1 hover:shadow-xl hover:border-blue-200 transition-all duration-200">
+            <div class="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl bg-blue-600"></div>
+            <div class="flex items-start justify-between mb-4">
+                <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
+                    <i class="fas fa-chart-line"></i>
+                </div>
                 @if($revenueGrowth >= 0)
-                <span class="kbadge up"><i class="fas fa-arrow-up" style="font-size:8px;"></i> {{ $revenueGrowth }}%</span>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">
+                    <i class="fas fa-arrow-up" style="font-size:8px;"></i> {{ $revenueGrowth }}%
+                </span>
                 @else
-                <span class="kbadge dn"><i class="fas fa-arrow-down" style="font-size:8px;"></i> {{ abs($revenueGrowth) }}%</span>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">
+                    <i class="fas fa-arrow-down" style="font-size:8px;"></i> {{ abs($revenueGrowth) }}%
+                </span>
                 @endif
             </div>
-            <div class="kpi-lbl">Total Revenue</div>
-            <div class="kpi-val mono" style="font-size:17px;">Rp {{ number_format($totalRevenue,0,',','.') }}</div>
-            <div class="kpi-hint">Bulan ini: <b>Rp {{ number_format($revenueThisMonth,0,',','.') }}</b></div>
+            <p class="text-xs font-extrabold uppercase tracking-widest text-gray-400 mb-1">Total Revenue</p>
+            <p class="text-base font-black text-gray-900 font-mono leading-none mb-1">Rp {{ number_format($totalRevenue,0,',','.') }}</p>
+            <p class="text-xs text-gray-400">Bulan ini: <span class="font-bold text-gray-600">Rp {{ number_format($revenueThisMonth,0,',','.') }}</span></p>
         </div>
 
         {{-- Orders --}}
-        <div class="kpi am fu">
-            <div class="kpi-top">
-                <div class="kpi-ico am"><i class="fas fa-shopping-bag"></i></div>
-                <span class="kbadge neu">{{ $ordersThisMonth }} bln ini</span>
+        <div class="relative bg-gradient-to-br from-amber-50 to-white border border-gray-200 rounded-2xl p-5 overflow-hidden hover:-translate-y-1 hover:shadow-xl hover:border-amber-200 transition-all duration-200">
+            <div class="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl bg-amber-500"></div>
+            <div class="flex items-start justify-between mb-4">
+                <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center">
+                    <i class="fas fa-shopping-bag"></i>
+                </div>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700">
+                    <i class="fas fa-calendar" style="font-size:8px;"></i> {{ $ordersThisMonth }} bln ini
+                </span>
             </div>
-            <div class="kpi-lbl">Total Pesanan</div>
-            <div class="kpi-val">{{ number_format($totalOrders) }}</div>
-            <div class="kpi-hint"><b style="color:#d97706;">{{ $pendingOrders }} pending</b> · {{ $processingOrders }} diproses</div>
+            <p class="text-xs font-extrabold uppercase tracking-widest text-gray-400 mb-1">Total Pesanan</p>
+            <p class="text-2xl font-black text-gray-900 leading-none mb-1">{{ number_format($totalOrders) }}</p>
+            <p class="text-xs text-gray-400">
+                <span class="font-bold text-amber-600">{{ $pendingOrders }} pending</span>
+                · <span class="font-bold text-blue-600">{{ $processingOrders }} diproses</span>
+            </p>
         </div>
 
         {{-- Users --}}
-        <div class="kpi pu fu">
-            <div class="kpi-top">
-                <div class="kpi-ico pu"><i class="fas fa-users"></i></div>
+        <div class="relative bg-gradient-to-br from-purple-50 to-white border border-gray-200 rounded-2xl p-5 overflow-hidden hover:-translate-y-1 hover:shadow-xl hover:border-purple-200 transition-all duration-200">
+            <div class="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl bg-purple-600"></div>
+            <div class="flex items-start justify-between mb-4">
+                <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center">
+                    <i class="fas fa-users"></i>
+                </div>
                 @if($userGrowth >= 0)
-                <span class="kbadge up"><i class="fas fa-arrow-up" style="font-size:8px;"></i> {{ $userGrowth }}%</span>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">
+                    <i class="fas fa-arrow-up" style="font-size:8px;"></i> {{ $userGrowth }}%
+                </span>
                 @else
-                <span class="kbadge dn"><i class="fas fa-arrow-down" style="font-size:8px;"></i> {{ abs($userGrowth) }}%</span>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">
+                    <i class="fas fa-arrow-down" style="font-size:8px;"></i> {{ abs($userGrowth) }}%
+                </span>
                 @endif
             </div>
-            <div class="kpi-lbl">Total Pengguna</div>
-            <div class="kpi-val">{{ number_format($totalUsers) }}</div>
-            <div class="kpi-hint">+{{ $newUsersThisMonth }} pengguna baru bulan ini</div>
+            <p class="text-xs font-extrabold uppercase tracking-widest text-gray-400 mb-1">Total Pengguna</p>
+            <p class="text-2xl font-black text-gray-900 leading-none mb-1">{{ number_format($totalUsers) }}</p>
+            <p class="text-xs text-gray-400">+{{ $newUsersThisMonth }} pengguna baru bulan ini</p>
         </div>
 
-        {{-- Products --}}
-        <div class="kpi gr fu">
-            <div class="kpi-top">
-                <div class="kpi-ico gr"><i class="fas fa-box"></i></div>
-                @if($outOfStockProducts > 0)
-                <span class="kbadge dn">{{ $outOfStockProducts }} habis</span>
+        {{-- Stok Bahan Baku --}}
+        <div class="relative bg-gradient-to-br from-green-50 to-white border border-gray-200 rounded-2xl p-5 overflow-hidden hover:-translate-y-1 hover:shadow-xl hover:border-green-200 transition-all duration-200">
+            <div class="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl bg-green-600"></div>
+            <div class="flex items-start justify-between mb-4">
+                <div class="w-10 h-10 rounded-xl bg-green-100 text-green-600 flex items-center justify-center">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                @if($lowStockMaterialsCount > 0)
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">
+                    <i class="fas fa-exclamation-triangle" style="font-size:8px;"></i> {{ $lowStockMaterialsCount }} Kritis
+                </span>
                 @else
-                <span class="kbadge up"><i class="fas fa-check" style="font-size:8px;"></i> Stok OK</span>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">
+                    <i class="fas fa-check" style="font-size:8px;"></i> Aman
+                </span>
                 @endif
             </div>
-            <div class="kpi-lbl">Total Produk</div>
-            <div class="kpi-val">{{ number_format($totalProducts) }}</div>
-            <div class="kpi-hint">{{ $lowStockProducts }} produk stok menipis</div>
+            <p class="text-xs font-extrabold uppercase tracking-widest text-gray-400 mb-1">Stok Bahan Baku</p>
+            <p class="text-2xl font-black text-gray-900 leading-none mb-1">{{ number_format($totalMaterials) }} Jenis</p>
+            <p class="text-xs text-gray-400">
+                Habis: <span class="font-bold text-red-500">{{ $outOfStockProducts }}</span>
+                · Menipis: <span class="font-bold text-amber-500">{{ $lowStockMaterialsCount }}</span>
+            </p>
         </div>
+
     </div>
 
-    {{-- ROW 2 — Chart + Status --}}
-    <div class="sec-div">Analitik &amp; Distribusi</div>
-    <div class="g2">
+    {{-- ═══════════════════════════════════════
+         SECTION: ANALITIK & DISTRIBUSI
+    ═══════════════════════════════════════ --}}
+    <div class="flex items-center gap-3">
+        <div class="w-1.5 h-4 bg-blue-600 rounded-full"></div>
+        <span class="text-xs font-extrabold uppercase tracking-widest text-gray-400">Analitik &amp; Distribusi</span>
+        <div class="flex-1 h-px bg-gray-200"></div>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
 
         {{-- Revenue Chart --}}
-        <div class="panel">
-            <div class="ph">
-                <div class="ph-l">
-                    <div class="pico bl"><i class="fas fa-chart-bar"></i></div>
+        <div class="xl:col-span-2 bg-white border border-gray-200 rounded-2xl overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
                     <div>
-                        <div class="ptitle">Revenue 6 Bulan Terakhir</div>
-                        <div class="pdesc">Pendapatan dari pesanan selesai</div>
+                        <p class="text-sm font-extrabold text-gray-900">Revenue 6 Bulan Terakhir</p>
+                        <p class="text-xs text-gray-400">Pendapatan dari pesanan selesai </p>
                     </div>
                 </div>
+                <span class="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+                    <i class="fas fa-circle-notch fa-spin mr-1" style="font-size:9px;"></i>Live
+                </span>
             </div>
-            <div class="pbody">
+            <div class="p-5">
                 @php $maxRev = collect($revenueChart)->max('revenue') ?: 1; @endphp
-                <div style="display:flex;justify-content:space-between;margin-bottom:8px;padding:0 2px;">
-                    <span style="font-size:10px;color:#cbd5e1;font-weight:600;">Rp {{ number_format($maxRev/1000000,1) }}jt</span>
-                    <span style="font-size:10px;color:#cbd5e1;font-weight:600;">0</span>
+                <div class="flex justify-between mb-3 px-0.5">
+                    <span class="text-xs text-gray-300 font-semibold">Rp {{ number_format($maxRev/1000000,1) }}jt</span>
+                    <span class="text-xs text-gray-300 font-semibold">0</span>
                 </div>
-                <div class="chart-outer">
+                <div class="flex items-end gap-2" style="height:160px;">
                     @foreach($revenueChart as $rc)
-                    <div class="chart-col">
-                        <div class="chart-bw">
-                            <div class="chart-bar" style="height:{{ max(4, ($rc['revenue']/$maxRev)*130) }}px;">
-                                <span class="ctt">Rp {{ number_format($rc['revenue'],0,',','.') }}</span>
+                    <div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group">
+                        <div class="relative w-full flex justify-center items-end"
+                             style="height:{{ max(6, ($rc['revenue']/$maxRev)*130) }}px">
+                            <div class="w-full max-w-[40px] rounded-t-lg
+                                        bg-gradient-to-b from-blue-400 to-blue-600
+                                        group-hover:from-blue-300 group-hover:to-blue-500
+                                        transition-all cursor-pointer h-full">
+                                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5
+                                            bg-gray-900 text-white text-xs font-bold
+                                            px-2 py-1 rounded-lg whitespace-nowrap
+                                            opacity-0 group-hover:opacity-100 transition-opacity
+                                            pointer-events-none z-10">
+                                    Rp {{ number_format($rc['revenue'],0,',','.') }}
+                                    <br><span class="text-gray-400 font-normal">{{ $rc['orders'] }} pesanan</span>
+                                </div>
                             </div>
                         </div>
-                        <span class="chart-mo">{{ \Illuminate\Support\Str::substr($rc['month'],0,3) }}</span>
-                        <span class="chart-cnt">{{ $rc['orders'] }}x</span>
+                        <span class="text-xs font-bold text-gray-400">{{ \Illuminate\Support\Str::substr($rc['month'],0,3) }}</span>
+                        <span class="text-xs text-gray-300">{{ $rc['orders'] }}x</span>
                     </div>
                     @endforeach
                 </div>
@@ -383,101 +231,176 @@
         </div>
 
         {{-- Status Pesanan --}}
-        <div class="panel">
-            <div class="ph">
-                <div class="ph-l">
-                    <div class="pico am"><i class="fas fa-chart-pie"></i></div>
-                    <div>
-                        <div class="ptitle">Status Pesanan</div>
-                        <div class="pdesc">Distribusi semua pesanan</div>
-                    </div>
+        <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+            <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
+                <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-extrabold text-gray-900">Status Pesanan</p>
+                    <p class="text-xs text-gray-400">Distribusi semua pesanan</p>
                 </div>
             </div>
-            <div class="pbody">
-                @php $tot = max(1,$totalOrders); @endphp
-                <div class="srow">
-                    <div class="slabel"><span class="sdot" style="background:#22c55e;"></span>Selesai</div>
-                    <div class="strack"><div class="sfill" style="width:{{ round(($completedOrders/$tot)*100) }}%;background:#22c55e;"></div></div>
-                    <div class="scnt">{{ $completedOrders }}</div>
-                </div>
-                <div class="srow">
-                    <div class="slabel"><span class="sdot" style="background:#3b82f6;"></span>Diproses</div>
-                    <div class="strack"><div class="sfill" style="width:{{ round(($processingOrders/$tot)*100) }}%;background:#3b82f6;"></div></div>
-                    <div class="scnt">{{ $processingOrders }}</div>
-                </div>
-                <div class="srow">
-                    <div class="slabel"><span class="sdot" style="background:#f59e0b;"></span>Pending</div>
-                    <div class="strack"><div class="sfill" style="width:{{ round(($pendingOrders/$tot)*100) }}%;background:#f59e0b;"></div></div>
-                    <div class="scnt">{{ $pendingOrders }}</div>
-                </div>
-                <div class="srow" style="margin-bottom:0;">
-                    <div class="slabel"><span class="sdot" style="background:#f87171;"></span>Dibatalkan</div>
-                    <div class="strack"><div class="sfill" style="width:{{ round(($cancelledOrders/$tot)*100) }}%;background:#f87171;"></div></div>
-                    <div class="scnt">{{ $cancelledOrders }}</div>
+            <div class="p-5 space-y-3">
+                @php $tot = max(1, $totalOrders); @endphp
+
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-1.5 w-24 shrink-0">
+                        <i class="fas fa-check-circle text-green-500" style="font-size:10px;"></i>
+                        <span class="text-xs font-bold text-gray-600">Selesai</span>
+                    </div>
+                    <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-green-500 rounded-full transition-all duration-700"
+                             style="width:{{ round(($completedOrders/$tot)*100) }}%"></div>
+                    </div>
+                    <span class="text-xs font-black text-gray-900 w-6 text-right shrink-0">{{ $completedOrders }}</span>
                 </div>
 
-                <div style="display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid #f1f5f9;margin-top:14px;">
-                    <span style="font-size:11px;color:#94a3b8;font-weight:600;">Total Pesanan</span>
-                    <span style="font-size:18px;font-weight:900;color:var(--ink);">{{ number_format($totalOrders) }}</span>
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-1.5 w-24 shrink-0">
+                        <i class="fas fa-cog text-blue-500" style="font-size:10px;"></i>
+                        <span class="text-xs font-bold text-gray-600">Diproses</span>
+                    </div>
+                    <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-blue-500 rounded-full transition-all duration-700"
+                             style="width:{{ round(($processingOrders/$tot)*100) }}%"></div>
+                    </div>
+                    <span class="text-xs font-black text-gray-900 w-6 text-right shrink-0">{{ $processingOrders }}</span>
                 </div>
 
-                <div style="margin-top:10px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
-                    <span style="font-size:11px;font-weight:700;color:#166534;">Completion Rate</span>
-                    <span style="font-size:15px;font-weight:900;color:#16a34a;">{{ $totalOrders > 0 ? round(($completedOrders/$tot)*100) : 0 }}%</span>
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-1.5 w-24 shrink-0">
+                        <i class="fas fa-clock text-amber-400" style="font-size:10px;"></i>
+                        <span class="text-xs font-bold text-gray-600">Pending</span>
+                    </div>
+                    <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-amber-400 rounded-full transition-all duration-700"
+                             style="width:{{ round(($pendingOrders/$tot)*100) }}%"></div>
+                    </div>
+                    <span class="text-xs font-black text-gray-900 w-6 text-right shrink-0">{{ $pendingOrders }}</span>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-1.5 w-24 shrink-0">
+                        <i class="fas fa-times-circle text-red-400" style="font-size:10px;"></i>
+                        <span class="text-xs font-bold text-gray-600">Dibatalkan</span>
+                    </div>
+                    <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-red-400 rounded-full transition-all duration-700"
+                             style="width:{{ round(($cancelledOrders/$tot)*100) }}%"></div>
+                    </div>
+                    <span class="text-xs font-black text-gray-900 w-6 text-right shrink-0">{{ $cancelledOrders }}</span>
+                </div>
+
+                <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                    <span class="text-xs text-gray-400 font-semibold">
+                        <i class="fas fa-list-ol mr-1"></i>Total Pesanan
+                    </span>
+                    <span class="text-xl font-black text-gray-900">{{ number_format($totalOrders) }}</span>
+                </div>
+
+                <div class="flex items-center justify-between bg-green-50 border border-green-200 rounded-xl px-4 py-2.5">
+                    <span class="text-xs font-bold text-green-700">
+                        <i class="fas fa-percentage mr-1"></i>Completion Rate
+                    </span>
+                    <span class="text-base font-black text-green-600">
+                        {{ $totalOrders > 0 ? round(($completedOrders/$tot)*100) : 0 }}%
+                    </span>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- ROW 3 — Orders Table + Top Products --}}
-    <div class="sec-div">Transaksi &amp; Produk</div>
-    <div class="g2">
+    {{-- ═══════════════════════════════════════
+         SECTION: TRANSAKSI & PRODUK
+    ═══════════════════════════════════════ --}}
+    <div class="flex items-center gap-3">
+        <div class="w-1.5 h-4 bg-green-500 rounded-full"></div>
+        <span class="text-xs font-extrabold uppercase tracking-widest text-gray-400">Transaksi &amp; Produk</span>
+        <div class="flex-1 h-px bg-gray-200"></div>
+    </div>
 
-        {{-- Orders Table --}}
-        <div class="panel">
-            <div class="ph">
-                <div class="ph-l">
-                    <div class="pico gr"><i class="fas fa-receipt"></i></div>
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+
+        {{-- Tabel Pesanan Terbaru --}}
+        <div class="xl:col-span-2 bg-white border border-gray-200 rounded-2xl overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-green-100 text-green-600 flex items-center justify-center">
+                        <i class="fas fa-receipt"></i>
+                    </div>
                     <div>
-                        <div class="ptitle">Pesanan Terbaru</div>
-                        <div class="pdesc">Transaksi paling baru</div>
+                        <p class="text-sm font-extrabold text-gray-900">Pesanan Terbaru</p>
+                        <p class="text-xs text-gray-400">Transaksi paling baru</p>
                     </div>
                 </div>
-                <a href="{{ route('admin.orders.index') }}" class="plink">Lihat semua →</a>
+                <a href="{{ route('admin.orders.index') }}"
+                   class="text-xs font-bold text-blue-600 px-3 py-1.5 bg-blue-50 rounded-full hover:bg-blue-100 transition-colors whitespace-nowrap">
+                    <i class="fas fa-arrow-right mr-1"></i>Lihat semua
+                </a>
             </div>
-            <div style="overflow-x:auto;">
-                <table class="dtable">
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse">
                     <thead>
-                        <tr>
-                            <th>ID</th><th>Pelanggan</th><th>Total</th><th>Status</th><th>Tanggal</th>
+                        <tr class="bg-gray-50 border-b border-gray-100">
+                            <th class="px-4 py-3 text-left text-xs font-extrabold uppercase tracking-wider text-gray-400">ID</th>
+                            <th class="px-4 py-3 text-left text-xs font-extrabold uppercase tracking-wider text-gray-400">Pelanggan</th>
+                            <th class="px-4 py-3 text-left text-xs font-extrabold uppercase tracking-wider text-gray-400">Total</th>
+                            <th class="px-4 py-3 text-left text-xs font-extrabold uppercase tracking-wider text-gray-400">Status</th>
+                            <th class="px-4 py-3 text-left text-xs font-extrabold uppercase tracking-wider text-gray-400">Tanggal</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($recentOrders as $order)
-                        <tr>
-                            <td><span class="oid">#{{ $order->order_id }}</span></td>
-                            <td><span class="onam">{{ optional($order->user)->username ?? 'Guest' }}</span></td>
-                            <td><span class="oamt">Rp {{ number_format($order->total,0,',','.') }}</span></td>
-                            <td>
+                        <tr class="hover:bg-gray-50 transition-colors border-b border-gray-50">
+                            <td class="px-4 py-3">
+                                <span class="font-mono text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-md">#{{ $order->order_id }}</span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-black shrink-0">
+                                        {{ strtoupper(substr(optional($order->user)->username ?? 'G', 0, 1)) }}
+                                    </div>
+                                    <span class="text-sm font-bold text-gray-900">{{ optional($order->user)->username ?? 'Guest' }}</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="font-mono text-sm font-bold text-gray-900">Rp {{ number_format($order->total,0,',','.') }}</span>
+                            </td>
+                            <td class="px-4 py-3">
                                 @if($order->status === 'completed')
-                                    <span class="badge2 ok"><i class="fas fa-check" style="font-size:8px;"></i> Selesai</span>
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-green-50 text-green-700 border border-green-200">
+                                        <i class="fas fa-check" style="font-size:8px;"></i> Selesai
+                                    </span>
                                 @elseif($order->status === 'processing')
-                                    <span class="badge2 pr"><i class="fas fa-circle-notch fa-spin" style="font-size:8px;"></i> Diproses</span>
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                        <i class="fas fa-circle-notch fa-spin" style="font-size:8px;"></i> Diproses
+                                    </span>
                                 @elseif($order->status === 'pending')
-                                    <span class="badge2 pe"><i class="fas fa-clock" style="font-size:8px;"></i> Pending</span>
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                        <i class="fas fa-clock" style="font-size:8px;"></i> Pending
+                                    </span>
                                 @elseif($order->status === 'cancelled')
-                                    <span class="badge2 ca"><i class="fas fa-times" style="font-size:8px;"></i> Batal</span>
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-200">
+                                        <i class="fas fa-times" style="font-size:8px;"></i> Batal
+                                    </span>
                                 @else
-                                    <span class="badge2" style="background:#f8fafc;color:#64748b;border-color:var(--border);">{{ ucfirst($order->status) }}</span>
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-gray-50 text-gray-600 border border-gray-200">
+                                        {{ ucfirst($order->status) }}
+                                    </span>
                                 @endif
                             </td>
-                            <td style="font-size:11px;color:#94a3b8;">{{ $order->created_at->format('d M Y') }}</td>
+                            <td class="px-4 py-3">
+                                <span class="text-xs text-gray-400">
+                                    <i class="far fa-calendar mr-1"></i>{{ $order->created_at->format('d M Y') }}
+                                </span>
+                            </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" style="text-align:center;padding:36px;color:#94a3b8;">
-                                <i class="fas fa-inbox" style="font-size:22px;display:block;margin-bottom:8px;"></i>
-                                Belum ada pesanan
+                            <td colspan="5" class="text-center py-14 text-gray-400">
+                                <i class="fas fa-inbox text-3xl block mb-3 text-gray-300"></i>
+                                <p class="text-sm font-semibold">Belum ada pesanan</p>
                             </td>
                         </tr>
                         @endforelse
@@ -487,160 +410,282 @@
         </div>
 
         {{-- Top Products --}}
-        <div class="panel">
-            <div class="ph">
-                <div class="ph-l">
-                    <div class="pico pu"><i class="fas fa-trophy"></i></div>
+        <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center">
+                        <i class="fas fa-trophy"></i>
+                    </div>
                     <div>
-                        <div class="ptitle">Produk Terlaris</div>
-                        <div class="pdesc">Top 5 paling banyak terjual</div>
+                        <p class="text-sm font-extrabold text-gray-900">Produk Terlaris</p>
+                        <p class="text-xs text-gray-400">Top 5 paling banyak terjual</p>
                     </div>
                 </div>
-                <a href="{{ route('products.index') }}" class="plink">Lihat →</a>
+                <a href="{{ route('products.index') }}"
+                   class="text-xs font-bold text-blue-600 px-3 py-1.5 bg-blue-50 rounded-full hover:bg-blue-100 transition-colors">
+                    <i class="fas fa-arrow-right mr-1"></i>Lihat
+                </a>
             </div>
-            <div class="pbody">
+            <div class="p-5 space-y-4">
                 @php $maxSold = $topProducts->max('total_sold') ?: 1; @endphp
                 @forelse($topProducts as $i => $tp)
-                <div class="trow">
-                    <div class="rbadge r{{ $i+1 }}">
-                        @if($i === 0)<i class="fas fa-trophy" style="font-size:9px;"></i>
-                        @elseif($i <= 2)<i class="fas fa-medal" style="font-size:9px;"></i>
-                        @else {{ $i+1 }}
-                        @endif
+                <div class="flex items-center gap-3">
+                    @if($i === 0)
+                    <div class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black shrink-0 bg-yellow-100 text-yellow-700 border border-yellow-200">
+                        <i class="fas fa-trophy" style="font-size:10px;"></i>
                     </div>
-                    <div style="flex:1;min-width:0;">
-                        <div class="tname">{{ optional($tp->product)->product_name ?? '-' }}</div>
-                        <div class="ttrack"><div class="tfill" style="width:{{ ($tp->total_sold/$maxSold)*100 }}%;"></div></div>
+                    @elseif($i === 1)
+                    <div class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black shrink-0 bg-slate-100 text-slate-600 border border-slate-200">
+                        <i class="fas fa-medal" style="font-size:10px;"></i>
                     </div>
-                    <div class="tcnt">{{ $tp->total_sold }}</div>
+                    @elseif($i === 2)
+                    <div class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black shrink-0 bg-orange-100 text-orange-600 border border-orange-200">
+                        <i class="fas fa-medal" style="font-size:10px;"></i>
+                    </div>
+                    @else
+                    <div class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black shrink-0 bg-gray-100 text-gray-500 border border-gray-200">
+                        {{ $i+1 }}
+                    </div>
+                    @endif
+
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-bold text-gray-900 truncate">{{ optional($tp->product)->product_name ?? '-' }}</p>
+                        <div class="mt-1.5 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                            <div class="h-full rounded-full bg-gradient-to-r from-purple-400 to-purple-600 transition-all duration-700"
+                                 style="width:{{ ($tp->total_sold/$maxSold)*100 }}%"></div>
+                        </div>
+                    </div>
+                    <span class="font-mono text-xs font-bold text-gray-600 shrink-0 bg-gray-100 px-2 py-0.5 rounded-md">{{ $tp->total_sold }}</span>
                 </div>
                 @empty
-                <div style="text-align:center;padding:28px 0;color:#94a3b8;">
-                    <i class="fas fa-box-open" style="font-size:22px;display:block;margin-bottom:8px;"></i>
-                    Belum ada data penjualan
+                <div class="text-center py-10 text-gray-400">
+                    <i class="fas fa-box-open text-3xl block mb-3 text-gray-300"></i>
+                    <p class="text-sm font-semibold">Belum ada data penjualan</p>
                 </div>
                 @endforelse
             </div>
         </div>
     </div>
 
-    {{-- ROW 4 — Finance + Rating + Summary --}}
-    <div class="sec-div">Keuangan, Ulasan &amp; Data</div>
-    <div class="g3">
+    {{-- ═══════════════════════════════════════
+         SECTION: KEUANGAN, ULASAN & DATA
+    ═══════════════════════════════════════ --}}
+    <div class="flex items-center gap-3">
+        <div class="w-1.5 h-4 bg-purple-500 rounded-full"></div>
+        <span class="text-xs font-extrabold uppercase tracking-widest text-gray-400">Keuangan, Ulasan &amp; Data</span>
+        <div class="flex-1 h-px bg-gray-200"></div>
+    </div>
 
-        {{-- Finance --}}
-        <div class="panel">
-            <div class="ph">
-                <div class="ph-l">
-                    <div class="pico bl"><i class="fas fa-wallet"></i></div>
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+
+        {{-- Keuangan & Saldo --}}
+        <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
+                        <i class="fas fa-wallet"></i>
+                    </div>
                     <div>
-                        <div class="ptitle">Keuangan &amp; Saldo</div>
-                        <div class="pdesc">Arus kas &amp; penarikan</div>
+                        <p class="text-sm font-extrabold text-gray-900">Keuangan &amp; Saldo</p>
+                        <p class="text-xs text-gray-400">Arus kas &amp; penarikan</p>
                     </div>
                 </div>
-                <a href="" class="plink">Kelola →</a>
+                <a href="#" class="text-xs font-bold text-blue-600 px-3 py-1.5 bg-blue-50 rounded-full hover:bg-blue-100 transition-colors">
+                    <i class="fas fa-cog mr-1"></i>Kelola
+                </a>
             </div>
-            <div class="pbody">
-                <div class="fg">
-                    <div class="ft gr">
-                        <div class="ft-lbl">Saldo Masuk</div>
-                        <div class="ft-val">Rp {{ number_format($totalSaldoIn/1000000,1) }}jt</div>
+            <div class="p-5 space-y-3">
+
+                {{-- Saldo Masuk --}}
+                <div class="bg-green-50 border border-green-200 rounded-xl p-4">
+                    <div class="flex items-center gap-2 mb-1">
+                        <i class="fas fa-arrow-down text-green-600" style="font-size:11px;"></i>
+                        <p class="text-xs font-extrabold uppercase tracking-wider text-green-700">Saldo Masuk</p>
                     </div>
-                    <div class="ft rd">
-                        <div class="ft-lbl">Saldo Keluar</div>
-                        <div class="ft-val">Rp {{ number_format($totalSaldoOut/1000000,1) }}jt</div>
+                    <p class="font-mono text-xl font-black text-green-800">Rp {{ number_format($totalSaldoIn/1000000,1) }}jt</p>
+                    <p class="text-xs text-green-600 mt-0.5">Total dana yang masuk ke sistem</p>
+                </div>
+
+                {{-- Saldo Keluar --}}
+                <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+                    <div class="flex items-center gap-2 mb-1">
+                        <i class="fas fa-arrow-up text-red-500" style="font-size:11px;"></i>
+                        <p class="text-xs font-extrabold uppercase tracking-wider text-red-700">Saldo Keluar</p>
                     </div>
+                    <p class="font-mono text-xl font-black text-red-800">Rp {{ number_format($totalSaldoOut/1000000,1) }}jt</p>
+                    <p class="text-xs text-red-500 mt-0.5">Total dana yang keluar dari sistem</p>
                 </div>
-                <div class="ft bl" style="margin-bottom:10px;">
-                    <div class="ft-lbl">Withdrawal Disetujui</div>
-                    <div class="ft-val">Rp {{ number_format($totalWithdrawals,0,',','.') }}</div>
+
+                {{-- Withdrawal Disetujui --}}
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                    <div class="flex items-center gap-2 mb-1">
+                        <i class="fas fa-money-bill-wave text-blue-600" style="font-size:11px;"></i>
+                        <p class="text-xs font-extrabold uppercase tracking-wider text-blue-700">Withdrawal Disetujui</p>
+                    </div>
+                    <p class="font-mono text-xl font-black text-blue-800">Rp {{ number_format($totalWithdrawals,0,',','.') }}</p>
+                    <p class="text-xs text-blue-500 mt-0.5">Total penarikan yang diapprove</p>
                 </div>
+
+                {{-- Warning jika ada pending --}}
                 @if($pendingWithdrawals > 0)
-                <div style="display:flex;align-items:center;gap:8px;background:var(--amber-l);border:1.5px solid #fde68a;border-radius:10px;padding:9px 13px;">
-                    <i class="fas fa-exclamation-triangle" style="color:var(--amber);font-size:12px;"></i>
-                    <span style="font-size:11px;font-weight:700;color:#92400e;">{{ $pendingWithdrawals }} withdrawal menunggu persetujuan</span>
+                <div class="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                    <i class="fas fa-exclamation-triangle text-amber-500 mt-0.5"></i>
+                    <div>
+                        <p class="text-xs font-bold text-amber-800">{{ $pendingWithdrawals }} withdrawal menunggu persetujuan</p>
+                        <p class="text-xs text-amber-600 mt-0.5">Segera tinjau permintaan ini</p>
+                    </div>
+                </div>
+                @else
+                <div class="flex items-center gap-3 bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
+                    <i class="fas fa-check-circle text-gray-300"></i>
+                    <p class="text-xs font-semibold text-gray-400">Tidak ada withdrawal pending</p>
                 </div>
                 @endif
             </div>
         </div>
 
-        {{-- Rating --}}
-        <div class="panel">
-            <div class="ph">
-                <div class="ph-l">
-                    <div class="pico am"><i class="fas fa-star"></i></div>
-                    <div>
-                        <div class="ptitle">Rating &amp; Ulasan</div>
-                        <div class="pdesc">Kepuasan pelanggan</div>
-                    </div>
+        {{-- Rating & Ulasan --}}
+        <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+            <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
+                <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-500 flex items-center justify-center">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-extrabold text-gray-900">Rating &amp; Ulasan</p>
+                    <p class="text-xs text-gray-400">Kepuasan pelanggan</p>
                 </div>
             </div>
-            <div class="pbody">
-                <div style="display:flex;align-items:flex-start;gap:18px;">
-                    <div style="text-align:center;flex-shrink:0;">
-                        <div style="font-size:44px;font-weight:900;color:var(--ink);letter-spacing:-.04em;line-height:1;">{{ number_format($avgRating,1) }}</div>
-                        <div style="display:flex;gap:2px;justify-content:center;margin:6px 0 3px;">
-                            @for($s=1;$s<=5;$s++)
-                            <span class="rstar {{ $s <= round($avgRating) ? 'on' : 'off' }}">★</span>
+            <div class="p-5">
+
+                {{-- Big Score --}}
+                <div class="flex flex-col items-center justify-center pb-5 mb-5 border-b border-gray-100">
+                    <div class="text-6xl font-black text-gray-900 leading-none tracking-tighter">{{ number_format($avgRating,1) }}</div>
+                    <div class="flex gap-0.5 justify-center mt-2 mb-1">
+                        @for($s=1; $s<=5; $s++)
+                        <span class="text-2xl {{ $s <= round($avgRating) ? 'text-amber-400' : 'text-gray-200' }}">★</span>
+                        @endfor
+                    </div>
+                    <div class="text-xs text-gray-400 font-semibold">
+                        <i class="far fa-comment-dots mr-1"></i>{{ number_format($totalRatings) }} ulasan pelanggan
+                    </div>
+                </div>
+
+                {{-- Breakdown per bintang --}}
+                <div class="space-y-2">
+                    @for($r=5; $r>=1; $r--)
+                    @php
+                        $cnt = \App\Models\Ratings::where('rating',$r)->count();
+                        $pct = $totalRatings > 0 ? ($cnt/$totalRatings)*100 : 0;
+                    @endphp
+                    <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-0.5 w-16 shrink-0">
+                            @for($si=1; $si<=$r; $si++)
+                            <span class="text-amber-400" style="font-size:9px;">★</span>
                             @endfor
                         </div>
-                        <div style="font-size:11px;color:#94a3b8;font-weight:600;">{{ number_format($totalRatings) }} ulasan</div>
-                    </div>
-                    <div style="flex:1;">
-                        @for($r=5;$r>=1;$r--)
-                        @php
-                            $cnt = \App\Models\Ratings::where('rating',$r)->count();
-                            $pct = $totalRatings > 0 ? ($cnt/$totalRatings)*100 : 0;
-                        @endphp
-                        <div class="rbrow">
-                            <span style="font-size:10px;color:#94a3b8;width:10px;">{{ $r }}</span>
-                            <div class="rbtrack"><div class="rbfill" style="width:{{ $pct }}%;"></div></div>
-                            <span style="font-size:10px;color:#94a3b8;width:18px;text-align:right;">{{ $cnt }}</span>
+                        <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-amber-300 to-amber-500 rounded-full"
+                                 style="width:{{ $pct }}%"></div>
                         </div>
-                        @endfor
+                        <span class="text-xs font-bold text-gray-500 w-5 text-right shrink-0">{{ $cnt }}</span>
+                    </div>
+                    @endfor
+                </div>
+
+                {{-- Summary tiles --}}
+                <div class="mt-4 pt-4 border-t border-gray-100 grid grid-cols-2 gap-2">
+                    <div class="text-center bg-amber-50 rounded-xl p-3">
+                        <p class="text-xl font-black text-amber-600">{{ number_format($avgRating,1) }}</p>
+                        <p class="text-xs text-amber-500 font-semibold">Rata-rata</p>
+                    </div>
+                    <div class="text-center bg-gray-50 rounded-xl p-3">
+                        <p class="text-xl font-black text-gray-700">{{ $totalRatings }}</p>
+                        <p class="text-xs text-gray-400 font-semibold">Total Ulasan</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- Summary --}}
-        <div class="panel">
-            <div class="ph">
-                <div class="ph-l">
-                    <div class="pico gr"><i class="fas fa-th-large"></i></div>
-                    <div>
-                        <div class="ptitle">Ringkasan Data</div>
-                        <div class="pdesc">Jumlah keseluruhan entitas</div>
-                    </div>
+        {{-- Ringkasan Data --}}
+        <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+            <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
+                <div class="w-9 h-9 rounded-xl bg-green-100 text-green-600 flex items-center justify-center">
+                    <i class="fas fa-th-large"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-extrabold text-gray-900">Ringkasan Data</p>
+                    <p class="text-xs text-gray-400">Jumlah keseluruhan entitas</p>
                 </div>
             </div>
-            <div class="pbody">
-                <div class="sg">
-                    <a href="{{ route('categories.index') }}" class="st" style="background:#eff6ff;border-color:#bfdbfe;">
-                        <div class="sv" style="color:#1d4ed8;">{{ $totalCategories }}</div>
-                        <div class="sn" style="color:#3b82f6;">Kategori</div>
+            <div class="p-5">
+                <div class="grid grid-cols-3 gap-2">
+
+                    <a href="{{ route('categories.index') }}"
+                       class="flex flex-col items-center text-center p-3 rounded-xl bg-blue-50 border border-blue-100 hover:-translate-y-0.5 hover:shadow-md transition-all">
+                        <i class="fas fa-tags text-blue-500 text-lg mb-1.5"></i>
+                        <span class="text-2xl font-black text-blue-700 leading-none">{{ $totalCategories }}</span>
+                        <span class="text-xs font-bold text-blue-400 mt-0.5">Kategori</span>
                     </a>
-                    <a href="{{ route('services.index') }}" class="st" style="background:#f5f3ff;border-color:#ddd6fe;">
-                        <div class="sv" style="color:#6d28d9;">{{ $totalServices }}</div>
-                        <div class="sn" style="color:#7c3aed;">Layanan</div>
+
+                    <a href="{{ route('services.index') }}"
+                       class="flex flex-col items-center text-center p-3 rounded-xl bg-purple-50 border border-purple-100 hover:-translate-y-0.5 hover:shadow-md transition-all">
+                        <i class="fas fa-concierge-bell text-purple-500 text-lg mb-1.5"></i>
+                        <span class="text-2xl font-black text-purple-700 leading-none">{{ $totalServices }}</span>
+                        <span class="text-xs font-bold text-purple-400 mt-0.5">Layanan</span>
                     </a>
-                    <a href="{{ route('portofolios.index') }}" class="st" style="background:#fdf4ff;border-color:#f0abfc;">
-                        <div class="sv" style="color:#a21caf;">{{ $totalPortofolios }}</div>
-                        <div class="sn" style="color:#c026d3;">Portfolio</div>
+
+                    <a href="{{ route('portofolios.index') }}"
+                       class="flex flex-col items-center text-center p-3 rounded-xl bg-fuchsia-50 border border-fuchsia-100 hover:-translate-y-0.5 hover:shadow-md transition-all">
+                        <i class="fas fa-images text-fuchsia-500 text-lg mb-1.5"></i>
+                        <span class="text-2xl font-black text-fuchsia-700 leading-none">{{ $totalPortofolios }}</span>
+                        <span class="text-xs font-bold text-fuchsia-400 mt-0.5">Portfolio</span>
                     </a>
-                    <div class="st" style="background:#f0fdf4;border-color:#bbf7d0;cursor:default;">
-                        <div class="sv" style="color:#15803d;">{{ $completedOrders }}</div>
-                        <div class="sn" style="color:#16a34a;">Selesai</div>
+
+                    <div class="flex flex-col items-center text-center p-3 rounded-xl bg-green-50 border border-green-100">
+                        <i class="fas fa-check-circle text-green-500 text-lg mb-1.5"></i>
+                        <span class="text-2xl font-black text-green-700 leading-none">{{ $completedOrders }}</span>
+                        <span class="text-xs font-bold text-green-400 mt-0.5">Selesai</span>
                     </div>
-                    <div class="st" style="background:#fffbeb;border-color:#fde68a;cursor:default;">
-                        <div class="sv" style="color:#b45309;">{{ $pendingMemberRequests }}</div>
-                        <div class="sn" style="color:#d97706;">Req. Member</div>
-                    </div>
-                    <div class="st" style="background:#fef2f2;border-color:#fecaca;cursor:default;">
-                        <div class="sv" style="color:#b91c1c;">{{ $outOfStockProducts }}</div>
-                        <div class="sn" style="color:#dc2626;">Stok Habis</div>
+
+                    <a href="{{ route('member-requests.index') }}"
+                       class="flex flex-col items-center text-center p-3 rounded-xl bg-amber-50 border border-amber-100 hover:-translate-y-0.5 hover:shadow-md transition-all">
+                        <i class="fas fa-user-clock text-amber-500 text-lg mb-1.5"></i>
+                        <span class="text-2xl font-black text-amber-700 leading-none">{{ $pendingMemberRequests }}</span>
+                        <span class="text-xs font-bold text-amber-400 mt-0.5">Req. Member</span>
+                    </a>
+
+                    <a href="{{ route('materials.index') }}"
+                       class="flex flex-col items-center text-center p-3 rounded-xl bg-red-50 border border-red-100 hover:-translate-y-0.5 hover:shadow-md transition-all">
+                        <i class="fas fa-box-open text-red-400 text-lg mb-1.5"></i>
+                        <span class="text-2xl font-black text-red-700 leading-none">{{ $outOfStockProducts }}</span>
+                        <span class="text-xs font-bold text-red-400 mt-0.5">Stok Habis</span>
+                    </a>
+
+                </div>
+
+                {{-- Daftar bahan kritis dari $lowStockItems --}}
+                @if(isset($lowStockItems) && $lowStockItems->count() > 0)
+                <div class="mt-3 bg-red-50 border border-red-200 rounded-xl p-3">
+                    <p class="text-xs font-extrabold text-red-700 mb-2 flex items-center gap-1.5">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Bahan Kritis ({{ $lowStockItems->count() }} item)
+                    </p>
+                    <div class="space-y-1.5 max-h-28 overflow-y-auto pr-1">
+                        @foreach($lowStockItems as $item)
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-red-700 font-semibold truncate max-w-[120px]">
+                                <i class="fas fa-circle" style="font-size:5px;"></i>
+                                {{ $item->material_name }}
+                            </span>
+                            <span class="text-xs font-black text-red-600 ml-2 shrink-0 bg-red-100 px-2 py-0.5 rounded-md">
+                                Sisa {{ $item->stock }}
+                            </span>
+                        </div>
+                        @endforeach
                     </div>
                 </div>
+                @endif
+
             </div>
         </div>
 
@@ -648,14 +693,16 @@
 
 </div>
 
+@push('scripts')
 <script>
 (function(){
     const d = new Date();
     const days   = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
     const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
-    document.getElementById('live-date').textContent =
-        days[d.getDay()] + ', ' + d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+    const el = document.getElementById('live-date');
+    if (el) el.textContent = days[d.getDay()] + ', ' + d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
 })();
 </script>
+@endpush
 
-@endsection
+@endsection 

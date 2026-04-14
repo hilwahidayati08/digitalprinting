@@ -48,7 +48,7 @@
                         <td class="px-6 py-4 text-center">
                             @if($unit->width && $unit->height)
                                 <span class="inline-flex items-center px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black border border-blue-100 uppercase">
-                                    {{ $unit->width }} × {{ $unit->height }} CM
+                                    {{ $unit->width }} � {{ $unit->height }} CM
                                 </span>
                             @else
                                 <span class="text-[10px] font-bold text-gray-300 uppercase italic">Custom Size</span>
@@ -74,9 +74,8 @@
                 </tbody>
             </table>
         </div>
-        @if($units->hasPages())
-            <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/20">{{ $units->links() }}</div>
-        @endif
+    @include('partials.admin.pagination', ['paginator' => $units->withQueryString()])
+
     </div>
 </div>
 

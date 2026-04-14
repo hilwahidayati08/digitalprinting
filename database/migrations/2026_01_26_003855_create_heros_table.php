@@ -19,7 +19,6 @@ return new class extends Migration
             $table->string('headline',50);
             $table->string('subheadline');
             $table->string('photo');
-            $table->string('button_link')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

@@ -10,15 +10,14 @@ use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
 {
-public function index()
-{
-    // Tambahkan 'product.productImages' (sesuaikan nama relasi di model Product)
-$cart = Carts::with(['items.product.primaryImage', 'items.product.category', 'items.product.unit'])
-    ->where('user_id', auth()->id())
-    ->first();
+    public function index()
+    {
+        $cart = Carts::with(['items.product.primaryImage', 'items.product.category', 'items.product.unit', 'items.product.material'])
+            ->where('user_id', auth()->id())
+            ->first();
 
-    return view('frontend.carts.index', compact('cart'));
-}
+        return view('carts.index', compact('cart'));
+    }
 
 public function add(Request $request)
 {
@@ -39,29 +38,70 @@ public function add(Request $request)
             'user_id' => auth()->id()
         ]);
 
-        $product = Products::with(['category'])->findOrFail($request->product_id);
+        // ← Tambah 'material' di eager load
+        $product = Products::with(['category', 'material'])->findOrFail($request->product_id);
 
-        $width = (float) $request->width_cm;
-        $height = (float) $request->height_cm;
-        $qty = (int) $request->qty;
+        $width    = (float) $request->width_cm;
+        $height   = (float) $request->height_cm;
+        $qty      = (int) $request->qty;
+        $calcType = $product->category->calc_type;
+        $material = $product->material;
 
-        $price = $product->price;
+        // ================================================
+        // VALIDASI STOCK MATERIAL
+        // ================================================
+        if ($material) {
+            if ($material->stock <= 0) {
+                DB::rollBack();
+                return back()->with('error', 'Stok material habis, produk tidak dapat dipesan.');
+            }
+
+            if ($calcType === 'stiker') {
+                $matW    = (float) $material->width_cm;
+                $matH    = (float) $material->height_cm;
+                $spacing = ((float) ($material->spacing_mm ?? 0)) / 10;
+
+                if ($matW > 0 && $matH > 0 && $width > 0 && $height > 0) {
+                    if ($width <= $matW && $height <= $matH) {
+                        // Hitung yield — cek orientasi normal vs rotasi
+                        $cols1      = floor($matW / ($width  + $spacing));
+                        $rows1      = floor($matH / ($height + $spacing));
+                        $cols2      = floor($matW / ($height + $spacing));
+                        $rows2      = floor($matH / ($width  + $spacing));
+                        $yieldSheet = max($cols1 * $rows1, $cols2 * $rows2);
+                        $maxQty     = $yieldSheet > 0 ? $material->stock * $yieldSheet : $material->stock;
+                    } else {
+                        // Ukuran melebihi material → 1 pcs = 1 lembar
+                        $maxQty = $material->stock;
+                    }
+                } else {
+                    $maxQty = $material->stock;
+                }
+
+                if ($qty > $maxQty) {
+                    DB::rollBack();
+                    return back()->with('error', "Jumlah melebihi stok tersedia. Maksimal {$maxQty} pcs.");
+                }
+
+            } else {
+                // Untuk luas & satuan: qty tidak boleh melebihi stock lembar
+                if ($qty > $material->stock) {
+                    DB::rollBack();
+                    return back()->with('error', "Jumlah melebihi stok tersedia. Tersedia {$material->stock} lembar.");
+                }
+            }
+        }
+        // ================================================
+
+        $price    = $product->price;
         $subtotal = 0;
 
-        $calcType = $product->category->calc_type;
-
         if ($calcType === 'luas' && $width > 0 && $height > 0) {
-
-            $luasM2 = ($width * $height) / 10000;
-
-            $luasHitung = max($luasM2, 1);
-
-            $subtotal = $luasHitung * $price * $qty;
-
+            $luasM2      = ($width * $height) / 10000;
+            $luasHitung  = max($luasM2, 1);
+            $subtotal    = $luasHitung * $price * $qty;
         } else {
-
             $subtotal = $price * $qty;
-
         }
 
         $existingItem = CartItems::where('cart_id', $cart->cart_id)
@@ -71,13 +111,23 @@ public function add(Request $request)
             ->first();
 
         if ($existingItem) {
-
             $newQty = $existingItem->qty + $qty;
 
+            // Cek juga total setelah merge dengan existing cart
+            if ($material && $calcType === 'stiker') {
+                if (isset($maxQty) && $newQty > $maxQty) {
+                    DB::rollBack();
+                    return back()->with('error', "Total pesanan melebihi stok. Kamu sudah punya {$existingItem->qty} pcs di keranjang, maksimal {$maxQty} pcs.");
+                }
+            } elseif ($material && $newQty > $material->stock) {
+                DB::rollBack();
+                return back()->with('error', "Total pesanan melebihi stok. Kamu sudah punya {$existingItem->qty} di keranjang, tersedia {$material->stock} lembar.");
+            }
+
             $existingItem->update([
-                'qty' => $newQty,
+                'qty'      => $newQty,
                 'subtotal' => ($subtotal / $qty) * $newQty,
-                'notes' => $request->notes ?? $existingItem->notes,
+                'notes'    => $request->notes ?? $existingItem->notes,
             ]);
 
             $message = 'Jumlah pesanan diperbarui';
@@ -85,15 +135,15 @@ public function add(Request $request)
         } else {
 
             CartItems::create([
-                'cart_id' => $cart->cart_id,
-                'product_id' => $product->product_id,
-                'width_cm' => $width,
-                'height_cm' => $height,
-                'qty' => $qty,
-                'price' => $price,
+                'cart_id'         => $cart->cart_id,
+                'product_id'      => $product->product_id,
+                'width_cm'        => $width,
+                'height_cm'       => $height,
+                'qty'             => $qty,
+                'price'           => $price,
                 'total_yield_pcs' => $request->total_yield_pcs,
-                'subtotal' => $subtotal,
-                'notes' => $request->notes,
+                'subtotal'        => $subtotal,
+                'notes'           => $request->notes,
             ]);
 
             $message = 'Berhasil ditambahkan ke keranjang';
@@ -104,9 +154,7 @@ public function add(Request $request)
         return redirect()->route('cart.index')->with('success', $message);
 
     } catch (\Exception $e) {
-
         DB::rollBack();
-
         return back()->with('error', $e->getMessage());
     }
 }

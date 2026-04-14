@@ -66,9 +66,6 @@
                         <span class="text-gray-500">Rate Aktif</span>
                         <span class="font-bold text-green-600">
                             {{ $user->active_commission_rate }}%
-                            @if($user->commission_rate_override)
-                                <span class="text-[10px] text-orange-500 font-normal">(override)</span>
-                            @endif
                         </span>
                     </div>
                 </div>
@@ -95,14 +92,6 @@
                             <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
                                 Rate Khusus (%)
                             </label>
-                            <div class="relative">
-                                <input type="number" name="commission_rate_override"
-                                    value="{{ $user->commission_rate_override }}"
-                                    min="0" max="100" step="0.5"
-                                    placeholder="Kosongkan = ikut tier"
-                                    class="w-full border border-gray-200 rounded-xl px-4 py-3 pr-8 text-sm font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition-all">
-                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">%</span>
-                            </div>
                             <p class="mt-1.5 text-xs text-gray-400">Kosongkan untuk mengikuti rate tier ({{ $user->tier_label }}: {{ $user->active_commission_rate }}%)</p>
                         </div>
                         <button type="submit"

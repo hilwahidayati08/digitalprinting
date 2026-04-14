@@ -25,9 +25,9 @@ class SaldoLogController extends Controller
         $query->where('type', $request->type);
     }
 
-    $logs = $query->latest()->paginate(15)->withQueryString();
+    $logs = $query->latest()->paginate(5)->withQueryString();
 
-    return view('admin.saldo-logs.index', compact('logs'));
+    return view('saldo-logs.index', compact('logs'));
 }
 
     // ADMIN
@@ -43,8 +43,8 @@ class SaldoLogController extends Controller
             $query->where('type', $request->type);
         }
 
-        $logs = $query->latest()->paginate(20);
+        $logs = $query->latest()->paginate(5);
 
-        return view('saldo-logs.index', compact('logs')); // ✅ fix
+        return view('saldo-logs.admin_index', compact('logs')); // ✅ fix
     }
 }

@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             ServiceSeeder::class,
             PortfolioSeeder::class,
 HeroSeeder::class,
+PrintingDataSeeder::class,
         ]);
     }
 }

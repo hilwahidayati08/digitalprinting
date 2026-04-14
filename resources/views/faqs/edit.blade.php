@@ -1,7 +1,7 @@
 @extends('admin.admin')
 
-@section('title', 'Tambah FAQ - Admin Panel')
-@section('page-title', 'Tambah FAQ')
+@section('title', 'Edit FAQ - Admin Panel')
+@section('page-title', 'Edit FAQ')
 
 @section('breadcrumbs')
     <nav class="flex mb-4" aria-label="Breadcrumb">
@@ -18,7 +18,7 @@
             <li>
                 <div class="flex items-center">
                     <i class="fas fa-chevron-right text-gray-400 text-xs mx-2"></i>
-                    <span class="text-sm font-medium text-gray-900">Tambah</span>
+                    <span class="text-sm font-medium text-gray-900">Edit</span>
                 </div>
             </li>
         </ol>
@@ -26,13 +26,12 @@
 @endsection
 
 @section('content')
-{{-- Menghapus max-w-4xl mx-auto agar full width --}}
 <div class="w-full">
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="p-6 border-b border-gray-50 flex justify-between items-center">
             <div>
-                <h2 class="text-lg font-bold text-gray-900">Buat FAQ Baru</h2>
-                <p class="text-sm text-gray-500">Tambahkan informasi tanya jawab baru untuk pelanggan</p>
+                <h2 class="text-lg font-bold text-gray-900">Edit FAQ</h2>
+                <p class="text-sm text-gray-500">Perbarui informasi tanya jawab</p>
             </div>
             <a href="{{ route('faqs.index') }}" class="text-gray-400 hover:text-gray-600 transition-colors">
                 <i class="fas fa-times text-xl"></i>
@@ -54,27 +53,29 @@
                 </div>
             @endif
 
-            <form action="{{ route('faqs.store') }}" method="POST" class="space-y-6">
+            <form action="{{ route('faqs.update', $faq->faq_id) }}" method="POST" class="space-y-6">
                 @csrf
+                @method('PUT')
                 
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">Pertanyaan <span class="text-red-500">*</span></label>
-                    <input type="text" name="question" value="{{ old('question') }}" 
+                    <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">Pertanyaan</label>
+                    <input type="text" name="question" value="{{ old('question', $faq->question) }}" 
                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
-                           placeholder="Masukkan pertanyaan..." required>
+                           placeholder="Masukkan pertanyaan...">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">Jawaban <span class="text-red-500">*</span></label>
+                    <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">Jawaban</label>
                     <textarea name="answer" rows="5" 
                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
-                              placeholder="Masukkan jawaban lengkap..." required>{{ old('answer') }}</textarea>
+                              placeholder="Masukkan jawaban lengkap...">{{ old('answer', $faq->answer) }}</textarea>
                 </div>
 
                 <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100">
                     <label class="flex items-center cursor-pointer group">
                         <div class="relative">
-                            <input type="checkbox" name="is_active" value="1" class="sr-only peer" checked>
+                            <input type="checkbox" name="is_active" value="1" class="sr-only peer" 
+                                   {{ old('is_active', $faq->is_active) ? 'checked' : '' }}>
                             <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                         </div>
                         <div class="ml-3">
@@ -90,7 +91,7 @@
                     </a>
                     <button type="submit" class="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl shadow-md shadow-primary-200 transition-all font-bold text-sm flex items-center gap-2">
                         <i class="fas fa-save"></i>
-                        Simpan FAQ
+                        Update FAQ
                     </button>
                 </div>
             </form>

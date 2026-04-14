@@ -19,8 +19,7 @@ return new class extends Migration
             $table->timestamp('expires_at');
             $table->boolean('is_used')->default(false);
             $table->timestamps();
-            
-            // FOREIGN KEY AKTIF - Memastikan integritas data
+ 
             $table->foreign('useremail')
                   ->references('useremail')
                   ->on('users')

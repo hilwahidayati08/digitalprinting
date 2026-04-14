@@ -72,23 +72,25 @@
                                 </span>
                             @endif
                         </td>
-                        <td class="px-6 py-4">
-                            <div class="flex justify-center items-center gap-2">
-                                <a href="{{ route('faqs.edit', $faq->faq_id) }}" 
-                                   class="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-gray-200 text-blue-600 hover:bg-blue-50 transition-all shadow-sm"
-                                   title="Edit FAQ">
-                                    <i class="fas fa-edit text-xs"></i>
-                                </a>
-                                <button type="button" onclick="confirmDelete('{{ $faq->faq_id }}')"
-                                        class="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-gray-200 text-red-600 hover:bg-red-50 transition-all shadow-sm"
-                                        title="Hapus FAQ">
-                                    <i class="fas fa-trash text-xs"></i>
-                                </button>
-                                <form id="delete-form-{{ $faq->faq_id }}" action="{{ route('faqs.destroy', $faq->faq_id) }}" method="POST" class="hidden">
-                                    @csrf @method('DELETE')
-                                </form>
-                            </div>
-                        </td>
+<td class="px-6 py-4">
+    <div class="flex justify-center items-center gap-2">
+        <a href="{{ route('faqs.edit', $faq->faq_id) }}" 
+           class="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-gray-200 text-blue-600 hover:bg-blue-50 transition-all shadow-sm">
+            <i class="fas fa-edit text-xs"></i>
+        </a>
+        
+        {{-- Form delete langsung --}}
+        <form action="{{ route('faqs.destroy', $faq->faq_id) }}" method="POST" class="inline-block">
+            @csrf
+            @method('DELETE')
+            <button type="submit" 
+                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-gray-200 text-red-600 hover:bg-red-50 transition-all shadow-sm"
+                    onclick="return confirm('Yakin ingin menghapus FAQ ini?')">
+                <i class="fas fa-trash text-xs"></i>
+            </button>
+        </form>
+    </div>
+</td>
                     </tr>
                     @empty
                     <tr>
@@ -103,13 +105,8 @@
                 </tbody>
             </table>
         </div>
+@include('partials.admin.pagination', ['paginator' => $faqs->withQueryString()])
 
-        {{-- 4. Navigasi Pagination --}}
-        @if($faqs->hasPages())
-            <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/20">
-                {{ $faqs->links() }}
-            </div>
-        @endif
     </div>
 </div>
 

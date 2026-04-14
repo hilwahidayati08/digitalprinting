@@ -4,7 +4,7 @@
             <!-- Copyright -->
             <div class="mb-4 md:mb-0">
                 <p class="text-sm text-gray-600">
-                    © {{ date('Y') }} <span class="font-semibold text-primary-600">PrintMaster Pro</span>. All rights reserved.
+                    © {{ date('Y') }} <span class="font-semibold text-primary-600">CetakKilat Pro</span>. All rights reserved.
                 </p>
                 <p class="text-xs text-gray-500 mt-1">
                     Digital Printing Management System v2.1.0

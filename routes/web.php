@@ -20,9 +20,10 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\MaterialsController;
 use App\Http\Controllers\StockLogsController;
-use App\Http\Controllers\MemberRequestController; // tambahan komisi
-use App\Http\Controllers\WithdrawalController;    // tambahan komisi
-use App\Http\Controllers\SaldoLogController;      // tambahan komisi
+use App\Http\Controllers\MemberRequestController; 
+use App\Http\Controllers\WithdrawalController;    
+use App\Http\Controllers\SaldoLogController;      
+use App\Http\Controllers\NotificationController;
 use Laravolt\Indonesia\Models\City;
 use Laravolt\Indonesia\Models\District;
 use Laravolt\Indonesia\Models\Village;
@@ -32,7 +33,7 @@ use App\Models\Settings;
 // =========== PUBLIC ===========
 Route::get('/', fn() => redirect()->route('home'));
 Route::get('/home', [HomeController::class, 'home'])->name('home');
-Route::post('/midtrans/callback', [OrderController::class, 'handleNotification']);
+
 
 Route::get('auth/google', [AuthController::class, 'redirectToGoogle'])->name('google.login');
 Route::get('auth/google/callback', [AuthController::class, 'handleGoogleCallback']);
@@ -69,12 +70,13 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
     Route::get('/admin/report', [OrderController::class, 'report'])->name('admin.orders.report');
+    Route::get('/admin/report/pdf', [OrderController::class, 'reportPdf'])->name('admin.orders.report.pdf'); 
     Route::get('/ordersadmin', [OrderController::class, 'adminIndex'])->name('admin.orders.index');
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
     Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
     // Master Data
     Route::resource('categories', CategoryController::class);
-    Route::resource('heros', HeroController::class);
+Route::resource('heros', HeroController::class)->except(['edit', 'create', 'show']);
     Route::resource('units', UnitController::class);
     Route::resource('faqs', FaqController::class);
 
@@ -89,7 +91,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::delete('/admin/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
 
     Route::resource('portofolios', PortofolioController::class)->except(['show, index']);
-    Route::resource('users', UserController::class)->except(['edit', 'update']);
+    Route::resource('users', UserController::class)->except(['editProfile', 'updateProfile', 'show']);
     Route::resource('services', ServiceController::class);
     Route::resource('stocklogs', StockLogsController::class);
     Route::resource('materials', MaterialsController::class);
@@ -107,21 +109,30 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     Route::prefix('withdrawals')->name('admin.withdrawals.')->group(function () {
         Route::get('/', [WithdrawalController::class, 'adminIndex'])->name('index');
+            Route::post('/admin-store', [WithdrawalController::class, 'adminStore'])->name('adminStore'); // ← TAMBAHKAN INI
+
         Route::post('/{id}/approve', [WithdrawalController::class, 'approve'])->name('approve');
         Route::post('/{id}/reject', [WithdrawalController::class, 'reject'])->name('reject');
     });
 
     Route::get('/admin-saldo-logs', [SaldoLogController::class, 'adminIndex'])->name('admin.saldo-logs.index');
+    Route::post('/admin/orders/{id}/confirm-cash', [OrderController::class, 'confirmCash'])->name('orders.confirmCash');
+Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
+Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
+
 });
 
 // =========== USER (sudah login, semua role termasuk admin) ===========
 Route::middleware(['auth', 'role:admin,user'])->group(function () {
-
-    Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
-    Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
+    Route::get('/profile', [App\Http\Controllers\UserController::class, 'editProfile'])->name('profile.edit');
+    Route::put('/profile', [App\Http\Controllers\UserController::class, 'updateProfile'])->name('profile.update');
+    
+    // Security route baru
+    Route::get('/security', [App\Http\Controllers\UserController::class, 'editSecurity'])->name('profile.security');
+    Route::put('/security', [App\Http\Controllers\UserController::class, 'updateSecurity'])->name('security.update');
 
     Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.show');
-    Route::get('/products', [ProductController::class, 'index'])->name('products.products');
+    Route::get('/products', [ProductController::class, 'index'])->name('products');
     Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])->name('logout');
     Route::resource('profiles', ProfileController::class);
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
@@ -141,15 +152,14 @@ Route::middleware(['auth', 'role:admin,user'])->group(function () {
     Route::resource('shippings', ShippingController::class);
 
     // Orders - User
-Route::post('/orders/{orderNumber}/snap-token', [OrderController::class, 'getSnapToken'])->name('orders.snap-token');
-Route::post('/orders/{orderNumber}/snap-token', [OrderController::class, 'getSnapToken'])->name('orders.snap-token');
+    Route::post('/orders/{orderNumber}/snap-token', [OrderController::class, 'getSnapToken'])->name('orders.snap-token');
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-    Route::get('/show/{id}', [OrderController::class, 'show'])->name('orders.show');
+Route::get('/orders/{order_number}', [OrderController::class, 'show'])->name('orders.show');
     Route::get('/download-invoice/{order_number}', [OrderController::class, 'downloadInvoice'])->name('orders.invoice');
-    Route::post('/upload-payment/{id}', [OrderController::class, 'uploadPayment'])->name('orders.upload-payment');
     Route::post('/orders/upload-design/{id}', [OrderController::class, 'uploadDesign'])->name('orders.upload');
-    Route::patch('/orders/update-notes/{id}', [OrderController::class, 'updateItemNotes'])
-        ->name('orders.update-notes');    // Orders - Admin update status (dipindah ke sini agar tidak konflik middleware)
+    // web.php
+// Ganti PATCH → POST
+    Route::post('/orders/{id}/notes', [OrderController::class, 'updateNotes'])->name('orders.update-notes');
     Route::post('/orders/update-status/{id}', [OrderController::class, 'updateStatus'])->name('admin.orders.updateStatus');
     Route::get('/orders/{order_number}/resi', [OrderController::class, 'downloadResi'])->name('orders.resi');
     Route::post('/orders/rate', [OrderController::class, 'storeRating'])->name('orders.rate');
@@ -158,63 +168,10 @@ Route::post('/orders/{orderNumber}/snap-token', [OrderController::class, 'getSna
     Route::get('/withdrawal', [WithdrawalController::class, 'index'])->name('withdrawal.index');
     Route::post('/withdrawal/store', [WithdrawalController::class, 'store'])->name('withdrawal.store');
     Route::get('/saldo-logs', [SaldoLogController::class, 'index'])->name('saldo.logs');
-});
+    Route::post('/orders/cancel/{id}', [OrderController::class, 'cancel'])->name('orders.cancel');
+    Route::post('/orders/{id}/confirm-received', [OrderController::class, 'confirmReceived'])
+    ->name('orders.confirm-received');
 
-// TEMPORARY - hapus setelah selesai
-Route::get('/fix-stock', function () {
-    $orders = \App\Models\Orders::with(['items.product.material.unit'])
-        ->where('stock_reduced', 0)
-        ->whereIn('status', ['paid', 'processing', 'shipped', 'delivered'])
-        ->get();
-
-    $results = [];
-
-    foreach ($orders as $order) {
-        foreach ($order->items as $item) {
-            $material = $item->product?->material;
-            if (!$material) {
-                $results[] = "❌ material NULL - order #{$order->order_number} product_id={$item->product_id}";
-                continue;
-            }
-
-            $qty = intval($item->qty);
-            $unitName = strtoupper(optional($material->unit)->unit_name ?? '');
-            $w = floatval($item->width_cm ?? 0);
-            $h = floatval($item->height_cm ?? 0);
-
-            if (in_array($unitName, ['M²', 'M2', 'METER', 'METER PERSEGI'])) {
-                $used = ($w > 0 && $h > 0) ? ($w / 100) * ($h / 100) * $qty : $qty;
-                $desc = ($w > 0 && $h > 0) ? "{$w}cm × {$h}cm × {$qty}pcs" : "Qty: {$qty} (fixed)";
-            } else {
-                $used = $qty;
-                $desc = "Qty: {$qty} {$unitName}";
-            }
-
-            $oldStock = (float) $material->stock_qty;
-            $newStock = max(0, $oldStock - $used);
-
-            \DB::table('materials')
-                ->where('material_id', $material->material_id)
-                ->update(['stock_qty' => $newStock, 'updated_at' => now()]);
-
-            \DB::table('stock_logs')->insert([
-                'material_id' => $material->material_id,
-                'order_id' => $order->order_id,
-                'type' => 'out',
-                'amount' => $used,
-                'last_stock' => $newStock,
-                'description' => "Order #{$order->order_number} — {$desc}",
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            $results[] = "✅ {$material->material_name}: {$oldStock} → {$newStock} | order #{$order->order_number}";
-        }
-
-        $order->update(['stock_reduced' => 1]);
-    }
-
-    return response('<pre>' . implode("\n", $results) . '</pre>');
 });
 
 Route::get('/contact', function () {
@@ -224,6 +181,17 @@ Route::get('/contact', function () {
 
 Route::get('/portofolio/{slug}', [PortofolioController::class, 'show'])->name('portfolio.show');    // Cart
 Route::get('/portofolio', [PortofolioController::class, 'index'])->name('portofolio.index');
-Route::post('/orders/cancel/{id}', [OrderController::class, 'cancel'])->name('orders.cancel');
-    Route::get('/orders/create',            [OrderController::class, 'create'])->name('orders.create');
-    Route::post('/orders',                  [OrderController::class, 'store'])->name('orders.store');
+
+
+Route::get('/api/search-users', [OrderController::class, 'searchUsers']);
+Route::get('/api/search-products', [OrderController::class, 'searchProducts']);
+// Konfirmasi cash manual oleh admin
+Route::post('/midtrans/callback', [OrderController::class, 'handleNotification']);
+Route::post('/midtrans/notification', [OrderController::class, 'handleNotification']);
+
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/{id}/read', [NotificationController::class, 'read'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.readAll');
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+    Route::delete('/notifications/clear-read', [NotificationController::class, 'destroyRead'])->name('notifications.destroyRead');
+    Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount'])->name('notifications.unreadCount');

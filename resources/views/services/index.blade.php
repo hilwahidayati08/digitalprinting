@@ -108,5 +108,7 @@
 
         </div>
     </div>
+    @include('partials.admin.pagination', ['paginator' => $services->withQueryString()])
+
 </div>
 @endsection

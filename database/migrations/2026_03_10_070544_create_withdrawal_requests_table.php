@@ -10,15 +10,11 @@ return new class extends Migration {
         Schema::create('withdrawal_requests', function (Blueprint $table) {
             $table->id('withdrawal_id');
             $table->foreignId('user_id')->constrained('users', 'user_id');
-
-            $table->decimal('amount', 12, 2);       // Jumlah yang diminta
-            $table->string('bank_name');             // Nama bank
-            $table->string('account_number');        // Nomor rekening
-            $table->string('account_name');          // Nama pemilik rekening
-
-            $table->enum('status', ['pending', 'approved', 'rejected'])
-                  ->default('pending');
-            $table->text('rejection_reason')->nullable();
+            $table->decimal('amount', 12, 2);
+            $table->string('bank_name');
+            $table->string('account_number');
+            $table->string('account_name');
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->timestamp('processed_at')->nullable();
             $table->timestamps();
         });

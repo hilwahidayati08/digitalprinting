@@ -23,45 +23,58 @@ class AuthController extends Controller
 public function handleGoogleCallback()
 {
     try {
-        // Mengambil data user dari Google
         $googleUser = Socialite::driver('google')->user();
-        
-        // Socialite menggunakan method getEmail() atau properti email
-        $email = $googleUser->getEmail(); 
+        $email      = $googleUser->getEmail();
 
-        // 1. Cari user berdasarkan kolom 'useremail' di database Anda
+        // 1. Cek apakah sudah pernah login Google via google_id
+        $user = User::where('google_id', $googleUser->getId())->first();
+
+        if ($user) {
+            // Sudah pernah → langsung login
+            Auth::login($user);
+            request()->session()->regenerate();
+
+            return $user->role === 'admin'
+                ? redirect()->route('dashboard')
+                : redirect()->route('home');
+        }
+
+        // 2. Cek apakah email sudah terdaftar (akun manual)
         $user = User::where('useremail', $email)->first();
 
         if ($user) {
-            // 2. Update google_id jika ditemukan
+            // Email sudah ada → tautkan google_id ke akun existing
             $user->google_id = $googleUser->getId();
-            $user->save(); 
+            $user->save();
         } else {
-            // 3. Jika user baru, buat akun otomatis
-            $user = User::create([
-                // Gunakan getName() atau nickname
-                'username'  => $googleUser->getName() ?? $googleUser->getNickname(),
-                'useremail' => $email,
-                'google_id' => $googleUser->getId(),
-                'no_telp'   => '-',
-                'password'  => Hash::make(str()->random(24)),
-                'role'      => 'user',
-            ]);
+            // 3. User baru → buat akun, password NULL
+// SEBELUM
+// SESUDAH
+$baseUsername = str()->slug($googleUser->getName() ?? $googleUser->getNickname(), '_');
+$username = $baseUsername;
+
+while (User::where('username', $username)->exists()) {
+    $username = $baseUsername . '_' . rand(100, 999);
+}
+
+$user = User::create([
+    'username'  => $username,
+    'useremail' => $email,
+    'google_id' => $googleUser->getId(),
+    'no_telp'   => '-',
+    'password'  => null,
+    'role'      => 'user',
+]);
         }
 
-        // Login-kan user
         Auth::login($user);
         request()->session()->regenerate();
 
-        if ($user->role === 'admin') {
-            return redirect()->route('dashboard');
-        }
-        return redirect()->route('home');
+        return $user->role === 'admin'
+            ? redirect()->route('dashboard')
+            : redirect()->route('home');
 
     } catch (\Exception $e) {
-        // TIPS: Untuk debugging, Anda bisa ganti pesan error sementara dengan:
-        // return redirect()->route('login')->with('error', $e->getMessage());
-        
         return redirect()->route('login')->with('error', 'Gagal login via Google. Silakan coba lagi.');
     }
 }
@@ -171,27 +184,35 @@ public function verifyRegisterOtp(Request $request)
         return view('authen.login');
     }
 
-    public function proseslogin(Request $request)
-    {
-        $request->validate([
-            'useremail' => 'required|email',
-            'password' => 'required|string'
-        ]);
+public function proseslogin(Request $request)
+{
+    $request->validate([
+        'useremail' => 'required|string',
+        'password'  => 'required|string'
+    ]);
 
-        $user = User::where('useremail', $request->useremail)->first();
+    // Cek apakah input berupa email atau username
+    $fieldType = filter_var($request->useremail, FILTER_VALIDATE_EMAIL) ? 'useremail' : 'username';
 
-        if ($user && Hash::check($request->password, $user->password)) {
-            Auth::login($user);
-            request()->session()->regenerate();
+    $user = User::where($fieldType, $request->useremail)->first();
 
-            return $user->role === 'admin' 
-                ? redirect()->route('dashboard') 
-                : redirect()->route('home');
-        }
-
-        return redirect()->route('login')->with('error', 'Email atau password salah');
+    // Akun Google murni (belum punya password) → arahkan login Google
+    if ($user && $user->google_id && is_null($user->password)) {
+        return redirect()->route('login')
+            ->with('error', 'Akun ini terdaftar via Google. Silakan login menggunakan tombol "Login dengan Google".');
     }
 
+    if ($user && Hash::check($request->password, $user->password)) {
+        Auth::login($user);
+        request()->session()->regenerate();
+
+        return $user->role === 'admin'
+            ? redirect()->route('dashboard')
+            : redirect()->route('home');
+    }
+
+    return redirect()->route('login')->with('error', 'Email/username atau password salah');
+}
     // =========== LOGOUT ===========
 
     public function logout(Request $request)
@@ -209,43 +230,48 @@ public function verifyRegisterOtp(Request $request)
     {
         return view('authen.forgot-password');
     }
+public function sendOtp(Request $request)
+{
+    $request->validate([
+        'useremail' => 'required|email|exists:users,useremail'
+    ]);
 
-    public function sendOtp(Request $request)
-    {
-        $request->validate([
-            'useremail' => 'required|email|exists:users,useremail'
-        ]);
+    $user = User::where('useremail', $request->useremail)->first();
 
-        $user = User::where('useremail', $request->useremail)->first();
-
-        // Bersihkan OTP lama
-        PasswordResetOtp::where('useremail', $request->useremail)
-            ->where('is_used', false)
-            ->update(['is_used' => true]);
-
-        $otpCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-        $token = bin2hex(random_bytes(32));
-
-        PasswordResetOtp::create([
-            'useremail' => $request->useremail,
-            'otp_code' => $otpCode,
-            'token' => $token,
-            'expires_at' => Carbon::now()->addMinutes(15),
-            'is_used' => false
-        ]);
-
-        try {
-            Mail::send('emails.otp', ['otpCode' => $otpCode, 'username' => $user->username], function ($message) use ($user) {
-                $message->to($user->useremail, $user->username)
-                        ->subject('🔐 Reset Password - Kode OTP Digital Printing');
-            });
-            
-            return redirect()->route('password.verify.form', ['token' => $token])
-                ->with('success', 'Kode OTP telah dikirim ke email Anda.');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Gagal mengirim email.');
-        }
+    // Akun Google murni → tidak punya password, tidak perlu reset
+    if ($user->isGoogleAccount()) {
+        return back()->with('error', 'Akun ini terdaftar via Google. Silakan login menggunakan tombol "Login dengan Google".');
     }
+
+    // Bersihkan OTP lama
+    PasswordResetOtp::where('useremail', $request->useremail)
+        ->where('is_used', false)
+        ->update(['is_used' => true]);
+
+    $otpCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+    $token   = bin2hex(random_bytes(32));
+
+    PasswordResetOtp::create([
+        'useremail'  => $request->useremail,
+        'otp_code'   => $otpCode,
+        'token'      => $token,
+        'expires_at' => Carbon::now()->addMinutes(15),
+        'is_used'    => false
+    ]);
+
+    try {
+        Mail::send('emails.otp', ['otpCode' => $otpCode, 'username' => $user->username], function ($message) use ($user) {
+            $message->to($user->useremail, $user->username)
+                    ->subject('🔐 Reset Password - Kode OTP Digital Printing');
+        });
+
+        return redirect()->route('password.verify.form', ['token' => $token])
+            ->with('success', 'Kode OTP telah dikirim ke email Anda.');
+
+    } catch (\Exception $e) {
+        return back()->with('error', 'Gagal mengirim email.');
+    }
+}
 
     public function showVerifyForm($token)
     {

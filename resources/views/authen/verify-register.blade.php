@@ -4,12 +4,11 @@
 
 @section('content')
 
-{{-- Logika untuk mengambil email dari session dan menyensornya (contoh: bu**@gmail.com) --}}
 @php
     $sessionData = session('registrasi_sementara');
     $email = $sessionData['useremail'] ?? 'email@anda.com';
     
-    // Logika sensor email sederhana
+    // Logika sensor email
     $parts = explode('@', $email);
     $name = $parts[0];
     $domain = $parts[1] ?? '';
@@ -18,86 +17,92 @@
     $hiddenEmail = substr($name, 0, $showLen) . str_repeat('*', $len - $showLen) . '@' . $domain;
 @endphp
 
-<div class="text-center">
-    <div class="mb-8 flex justify-center">
-        {{-- Pastikan file partial ini ada, jika error hapus baris ini --}}
-        @include('partials.auth.logo') 
+{{-- Sisi Kiri: Form --}}
+<div class="auth-left">
+    <div class="auth-brand">
+        <div class="auth-brand-icon"></div>
+        <span class="auth-brand-name">Digital Printing</span>
     </div>
 
-    <div class="mb-6">
-        <h2 class="text-3xl font-display font-bold text-neutral-800 tracking-tight">
-            Verifikasi Email
-        </h2>
-        <p class="text-neutral-500 text-sm mt-2 font-medium">
-            Masukkan 6 digit kode OTP yang telah kami kirim ke <br>
-            <span class="font-bold text-primary-600 tracking-wide">{{ $hiddenEmail }}</span>
-        </p>
-    </div>
+    <h1 class="auth-title">Verifikasi Email</h1>
+    <p class="auth-subtitle">
+        Masukkan 6 digit kode OTP yang dikirim ke <br>
+        <span style="color: #2563eb; font-weight: 700;">{{ $hiddenEmail }}</span>
+    </p>
 
-    {{-- Tampilkan Error Jika OTP Salah --}}
     @if(session('error'))
-        <div class="bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl p-3 mb-6 font-medium animate-pulse">
+        <div style="background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 12px; border-radius: 12px; font-size: 12px; margin-bottom: 20px; font-weight: 600;">
             ⚠️ {{ session('error') }}
         </div>
     @endif
     
     @if(session('success'))
-        <div class="bg-green-50 border border-green-200 text-green-600 text-sm rounded-xl p-3 mb-6 font-medium">
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #16a34a; padding: 12px; border-radius: 12px; font-size: 12px; margin-bottom: 20px; font-weight: 600;">
             ✅ {{ session('success') }}
         </div>
     @endif
+
+    <form action="{{ route('register.verify.process') }}" method="POST" class="space-y-5">
+        @csrf
+
+        {{-- Input OTP --}}
+        <div class="auth-field">
+            <label class="auth-label">Kode OTP (6 Angka)</label>
+            <div class="auth-input-wrap">
+                <span class="auth-input-icon"><i class="fas fa-key"></i></span>
+                <input type="text" 
+                       name="otp_code" 
+                       id="otp_code" 
+                       maxlength="6" 
+                       inputmode="numeric" 
+                       class="auth-input"
+                       style="text-align: center; letter-spacing: 10px; font-size: 22px; font-weight: 800;"
+                       placeholder="------" 
+                       required autofocus autocomplete="off">
+            </div>
+            @error('otp_code') <small style="color: #ef4444; font-size: 10px;">{{ $message }}</small> @enderror
+        </div>
+
+        {{-- Info Box --}}
+        <div style="background: #eff6ff; border-radius: 12px; padding: 12px; display: flex; gap: 10px; align-items: start;">
+            <i class="fas fa-info-circle" style="color: #3b82f6; margin-top: 2px;"></i>
+            <p style="font-size: 10px; color: #1e40af; line-height: 1.4;">
+                Cek folder <b>Spam/Junk</b> jika kode tidak muncul di kotak masuk utama Anda.
+            </p>
+        </div>
+
+        <button type="submit" class="auth-btn-primary">Verifikasi & Buat Akun</button>
+
+        <div class="auth-divider">
+            <span class="auth-divider-line"></span><span>ATAU</span><span class="auth-divider-line"></span>
+        </div>
+
+        <p style="text-align: center; margin-top: 15px; font-size: 12px; color: #64748b;">
+            Salah alamat email? 
+            <a href="{{ route('register') }}" style="color: #2563eb; font-weight: 800; text-decoration: none;">Daftar Ulang</a>
+        </p>
+    </form>
 </div>
 
-{{-- FORM UTAMA --}}
-<form action="{{ route('register.verify.process') }}" method="POST" class="space-y-6">
-    @csrf
-
-    <div class="space-y-2">
-        <label for="otp_code" class="block text-sm font-semibold text-neutral-700 ml-1">
-            Kode OTP (6 Angka)
-        </label>
-        <div class="relative group">
-            <input type="text" 
-                   name="otp_code" 
-                   id="otp_code" 
-                   maxlength="6" 
-                   inputmode="numeric" 
-                   class="w-full py-4 bg-white border-2 border-neutral-200 rounded-2xl text-center text-3xl tracking-[10px] focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 outline-none font-bold text-neutral-800 transition-all placeholder-neutral-300 @error('otp_code') border-red-500 text-red-600 @enderror" 
-                   placeholder="------" 
-                   required
-                   autofocus
-                   autocomplete="off">
+{{-- Sisi Kanan: Panel Biru --}}
+<div class="auth-right">
+    <div style="position: relative; z-index: 2;">
+        {{-- Ikon Amplop Terbuka --}}
+        <div class="floating-icon">
+            <i class="fas fa-envelope-open-text"></i>
         </div>
-        @error('otp_code')
-            <p class="text-xs text-red-500 font-bold ml-1 mt-1">{{ $message }}</p>
-        @enderror
-    </div>
-
-    <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 flex items-start gap-3">
-        <div class="text-blue-500 mt-0.5">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-        </div>
-        <p class="text-xs text-blue-700 leading-relaxed">
-            Tidak menerima kode? Cek folder <b>Spam/Junk</b> atau pastikan email yang Anda masukkan benar.
+        
+        <h2 style="font-size: 18px; font-weight: 800; margin-bottom: 8px;">
+            {{-- Teks: Verifikasi Akun --}}
+            <span class="typing-text">Verifikasi Akun</span>
+        </h2>
+        
+        <p style="opacity: 0.8; font-size: 11px; line-height: 1.5; max-width: 200px; margin: 0 auto;">
+            Satu langkah terakhir untuk memastikan keamanan akun dan melindungi data pribadi Anda.
         </p>
     </div>
+</div>
 
-    <button type="submit" class="w-full py-4 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-2xl shadow-lg shadow-primary-600/20 transition-all transform active:scale-[0.98]">
-        Verifikasi & Buat Akun
-    </button>
-
-    <div class="text-center pt-2">
-        <p class="text-sm text-neutral-500">
-            Salah alamat email? 
-            {{-- Tombol ini akan menghapus session dan membolehkan user daftar ulang --}}
-            <a href="{{ route('register') }}" class="text-primary-600 font-bold hover:underline hover:text-primary-700 transition-colors">
-                Daftar Ulang
-            </a>
-        </p>
-    </div>
-</form>
-
-{{-- Script Opsional: Biar input OTP otomatis angka saja --}}
 <script>
     document.getElementById('otp_code').addEventListener('input', function (e) {
         this.value = this.value.replace(/[^0-9]/g, '');

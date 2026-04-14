@@ -1,184 +1,164 @@
-@extends('admin.admin')
+@extends('admin.member')
 
-@section('title', 'Request Withdraw - Admin Panel')
+@section('title', 'Saldo Komisi & Withdraw')
 
-@section('content')
-<div class="max-full">
-    {{-- Header --}}
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <div>
-            <h2 class="text-2xl font-bold text-gray-900">Request Withdraw</h2>
-            <p class="text-sm text-gray-500">Kelola pencairan saldo para member</p>
-        </div>
+@section('member_content')
+<div class="max-w-5xl mx-auto px-4 mb-8 space-y-6">
+    <div class="bg-white rounded-[1.5rem] shadow-sm border border-neutral-100 overflow-hidden">
         
-        <div class="flex items-center gap-3">
-            {{-- Filter Status --}}
-            <form action="{{ route('admin.withdrawals.index') }}" method="GET" id="filterForm">
-                <select name="status" onchange="document.getElementById('filterForm').submit()"
-                    class="pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-sm font-bold text-gray-700 appearance-none shadow-sm">
-                    <option value="">Semua Status</option>
-                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>⏳ Pending</option>
-                    <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>✅ Disetujui</option>
-                    <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>❌ Ditolak</option>
-                </select>
-            </form>
-        </div>
-    </div>
-
-    {{-- Alert --}}
-    @if(session('success'))
-        <div class="mb-6 flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl shadow-sm">
-            <i class="fas fa-check-circle"></i>
-            <p class="text-sm font-black uppercase tracking-tight">{{ session('success') }}</p>
-        </div>
-    @endif
-
-    {{-- Table --}}
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-gray-50/50 border-b border-gray-100">
-                        <th class="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-wider text-center w-16">No</th>
-                        <th class="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-wider">Info Member</th>
-                        <th class="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-wider">Rekening Tujuan</th>
-                        <th class="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-wider text-center">Jumlah</th>
-                        <th class="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-wider text-center">Status</th>
-                        <th class="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-wider text-center">Waktu</th>
-                        <th class="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-wider text-center w-40">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50">
-                    @forelse($withdraws as $wd)
-                    <tr class="hover:bg-gray-50/50 transition-colors group">
-                        <td class="px-6 py-4 text-center">
-                            <span class="text-sm font-bold text-gray-400 italic">
-                                {{ ($withdraws->currentPage() - 1) * $withdraws->perPage() + $loop->iteration }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-black text-xs border border-blue-100">
-                                    {{ strtoupper(substr($wd->user->username, 0, 1)) }}
-                                </div>
-                                <div>
-                                    <div class="text-sm font-black text-gray-900 uppercase tracking-tight">{{ $wd->user->username }}</div>
-                                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">{{ $wd->user->useremail }}</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="text-[11px] font-black text-gray-800 uppercase leading-none mb-1">{{ $wd->bank_name }}</div>
-                            <div class="text-[10px] font-mono font-bold text-blue-600">{{ $wd->account_number }}</div>
-                            <div class="text-[10px] font-bold text-gray-400 uppercase italic">a/n {{ $wd->account_name }}</div>
-                        </td>
-                        <td class="px-6 py-4 text-center">
-                            <span class="text-sm font-black text-gray-900 leading-none tracking-tight">
-                                Rp {{ number_format($wd->amount, 0, ',', '.') }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 text-center">
-                            @if($wd->status === 'pending')
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-50 text-amber-600 text-[10px] font-black uppercase border border-amber-100">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Pending
-                                </span>
-                            @elseif($wd->status === 'approved')
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase border border-emerald-100">
-                                    <i class="fas fa-check-circle"></i> Disetujui
-                                </span>
-                            @else
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-rose-50 text-rose-600 text-[10px] font-black uppercase border border-rose-100">
-                                    Ditolak
-                                </span>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4 text-center whitespace-nowrap">
-                            <div class="text-sm font-black text-gray-900 uppercase leading-none mb-1">{{ $wd->created_at->format('d M Y') }}</div>
-                            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">{{ $wd->created_at->format('H:i') }} WIB</div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="flex justify-center items-center gap-2">
-                                @if($wd->status === 'pending')
-                                    <button type="button" onclick="confirmApprove({{ $wd->withdrawal_id }}, '{{ $wd->user->username }}', 'Rp {{ number_format($wd->amount, 0, ',', '.') }}')"
-                                        class="h-8 px-3 flex items-center justify-center gap-1.5 rounded-lg bg-emerald-500 text-white text-[10px] font-black uppercase hover:bg-emerald-600 transition-all shadow-sm">
-                                        <i class="fas fa-check"></i> Approve
-                                    </button>
-                                    <form id="approve-form-{{ $wd->withdrawal_id }}" action="{{ route('admin.withdrawals.approve', $wd->withdrawal_id) }}" method="POST" class="hidden">@csrf</form>
-                                    
-                                    <button type="button" onclick="showRejectModal({{ $wd->withdrawal_id }})"
-                                        class="h-8 px-3 flex items-center justify-center gap-1.5 rounded-lg bg-white border border-gray-200 text-red-600 text-[10px] font-black uppercase hover:bg-red-50 hover:border-red-200 transition-all shadow-sm">
-                                        <i class="fas fa-times"></i> Tolak
-                                    </button>
-                                @else
-                                    <span class="text-[10px] font-black text-gray-300 uppercase italic">Selesai</span>
-                                @endif
-                            </div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="7" class="px-6 py-12 text-center text-gray-400 italic font-bold uppercase tracking-widest">
-                            Belum ada request withdraw.
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        
-        @if($withdraws->hasPages())
-            <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/20">
-                {{ $withdraws->withQueryString()->links() }}
-            </div>
-        @endif
-    </div>
-</div>
-
-{{-- Modal Reject (Gaya Modern) --}}
-<div id="rejectModal" class="fixed inset-0 z-50 hidden bg-gray-900/40 backdrop-blur-sm flex items-center justify-center transition-all">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden border border-gray-100">
-        <div class="p-6">
-            <h3 class="text-xl font-black text-gray-900 uppercase tracking-tight mb-1">Tolak Request</h3>
-            <p class="text-sm text-gray-500 mb-4 font-bold italic">Saldo akan dikembalikan ke member.</p>
-            <form id="rejectForm" method="POST">
-                @csrf
-                <textarea name="rejection_reason" rows="3"
-                    class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-red-500/10 focus:border-red-400 transition-all resize-none"
-                    placeholder="Alasan penolakan..."></textarea>
-                <div class="flex justify-end gap-3 mt-6">
-                    <button type="button" onclick="closeRejectModal()"
-                        class="px-5 py-2.5 text-xs font-black uppercase text-gray-500 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all">Batal</button>
-                    <button type="submit"
-                        class="px-5 py-2.5 text-xs font-black uppercase text-white bg-red-500 hover:bg-red-600 rounded-xl transition-all shadow-sm">Tolak Sekarang</button>
+        {{-- Header dengan Gradient (Sesuai Desain Riwayat Pesanan) --}}
+        <div class="bg-gradient-to-br from-primary-600 to-secondary-600 px-8 py-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
+            <div class="relative z-10 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-white/20 backdrop-blur-md border border-white/30 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-wallet text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-white text-xl font-black italic uppercase tracking-tight leading-none">Saldo Komisi</h2>
+                        <p class="text-white/70 text-[11px] mt-2 font-medium italic">Tarik penghasilan referral Anda di sini</p>
+                    </div>
                 </div>
-            </form>
+                <div class="text-right">
+                    <p class="text-white/60 text-[10px] uppercase font-black tracking-widest leading-none mb-1">Total Saldo</p>
+                    <p class="text-white text-2xl font-black italic">{{ $user->saldo_komisi_formatted }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 lg:p-8 space-y-8">
+            {{-- Alert Messages --}}
+            @if(session('success'))
+                <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-[11px] font-bold flex items-center gap-2">
+                    <i class="fas fa-check-circle text-green-500"></i> {{ session('success') }}
+                </div>
+            @endif
+            @if(session('error') || $errors->any())
+                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-[11px] font-bold">
+                    @foreach($errors->all() as $error)
+                        <p class="flex items-center gap-2"><i class="fas fa-times-circle text-red-500"></i> {{ $error }}</p>
+                    @endforeach
+                    @if(session('error')) <p class="flex items-center gap-2"><i class="fas fa-times-circle text-red-500"></i> {{ session('error') }}</p> @endif
+                </div>
+            @endif
+
+            {{-- Info Non-Member --}}
+            @if(!$user->is_member)
+                <div class="p-4 bg-neutral-50 border border-neutral-100 rounded-2xl flex items-center gap-4">
+                    <div class="w-10 h-10 bg-primary-100 text-primary-600 rounded-xl flex items-center justify-center flex-shrink-0 text-sm">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="text-[11px] font-bold text-neutral-600 italic">Kamu belum menjadi member. Jadilah member untuk mendapatkan komisi dari setiap pembelian!</p>
+                </div>
+            @endif
+
+            {{-- Form Withdraw --}}
+            @if($user->is_member && $user->saldo_komisi >= 10000)
+            <div class="space-y-4">
+                <div class="flex items-center gap-2 border-b border-neutral-50 pb-2">
+                    <div class="w-1 h-4 bg-primary-600 rounded-full"></div>
+                    <h3 class="text-[11px] font-black text-neutral-800 uppercase tracking-widest">Ajukan Penarikan</h3>
+                </div>
+
+                <form action="{{ route('withdrawal.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    @csrf
+                    <div class="md:col-span-2">
+                        <label class="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-1.5 block">Jumlah Withdraw (Min. Rp 10.000)</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 font-black text-[11px]">RP</span>
+                            <input type="number" name="amount" min="10000" max="{{ $user->saldo_komisi }}" step="1000"
+                                class="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl text-[11px] font-bold text-neutral-700 outline-none focus:border-primary-600 focus:bg-white transition-all"
+                                placeholder="0">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-1.5 block">Nama Bank</label>
+                        <input type="text" name="bank_name" placeholder="Contoh: BCA / Mandiri"
+                            class="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl text-[11px] font-bold text-neutral-700 outline-none focus:border-primary-600 focus:bg-white transition-all">
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-1.5 block">Nomor Rekening</label>
+                        <input type="text" name="account_number" placeholder="Masukkan No. Rekening"
+                            class="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl text-[11px] font-bold text-neutral-700 outline-none focus:border-primary-600 focus:bg-white transition-all">
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-1.5 block">Nama Pemilik Rekening</label>
+                        <input type="text" name="account_name" placeholder="Sesuai nama di buku tabungan"
+                            class="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl text-[11px] font-bold text-neutral-700 outline-none focus:border-primary-600 focus:bg-white transition-all">
+                    </div>
+
+                    <div class="md:col-span-2 pt-2">
+                        <button type="submit" class="w-full py-3.5 bg-primary-600 hover:bg-primary-700 text-white text-[11px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-primary-200 flex items-center justify-center gap-2">
+                            <i class="fas fa-paper-plane text-[10px]"></i> Ajukan Withdraw Sekarang
+                        </button>
+                    </div>
+                </form>
+            </div>
+            @elseif($user->is_member && $user->saldo_komisi < 10000)
+                <div class="p-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-center gap-3">
+                    <i class="fas fa-exclamation-triangle text-amber-500 text-xs"></i>
+                    <p class="text-[10px] font-bold text-amber-700 uppercase tracking-tight">Saldo belum mencukupi batas minimum penarikan (Rp 10.000)</p>
+                </div>
+            @endif
+
+            {{-- RIWAYAT WITHDRAW (Sesuai List Pesanan) --}}
+            <div class="space-y-4 pt-4">
+                <div class="flex items-center justify-between border-b border-neutral-50 pb-2">
+                    <div class="flex items-center gap-2">
+                        <div class="w-1 h-4 bg-primary-600 rounded-full"></div>
+                        <h3 class="text-[11px] font-black text-neutral-800 uppercase tracking-widest">Riwayat Penarikan</h3>
+                    </div>
+                    <div class="text-[9px] text-neutral-400 uppercase font-black">
+Total: <span class="text-primary-600">{{ $withdraws->total() }}</span> Record
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    @forelse($withdraws as $wd)
+                    <div class="bg-white rounded-2xl border border-neutral-100 p-4 flex items-center justify-between hover:border-primary-200 transition-all">
+                        <div class="flex items-center gap-4">
+                            <div @class([
+                                'w-10 h-10 rounded-xl flex items-center justify-center text-xs shadow-sm',
+                                'bg-emerald-50 text-emerald-600' => $wd->status === 'approved',
+                                'bg-red-50 text-red-500' => $wd->status === 'rejected',
+                                'bg-amber-50 text-amber-500' => $wd->status === 'pending'
+                            ])>
+                                <i class="fas {{ $wd->status === 'approved' ? 'fa-check' : ($wd->status === 'rejected' ? 'fa-times' : 'fa-clock') }}"></i>
+                            </div>
+                            <div>
+                                <p class="text-[11px] font-black text-neutral-800 uppercase tracking-tight">{{ $wd->bank_name }} — {{ $wd->account_number }}</p>
+                                <p class="text-[10px] text-neutral-400 font-bold italic">{{ $wd->created_at->format('d M Y, H:i') }}</p>    
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[12px] font-black text-neutral-900 leading-none mb-1.5">{{ $wd->amount_formatted }}</p>
+                            @if($wd->status === 'pending')
+                                <span class="px-2 py-0.5 bg-amber-50 text-amber-500 border border-amber-100 rounded-md text-[8px] font-black uppercase tracking-widest">⏳ Pending</span>
+                            @elseif($wd->status === 'approved')
+                                <span class="px-2 py-0.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-md text-[8px] font-black uppercase tracking-widest">✅ Selesai</span>
+                            @else
+                                <span class="px-2 py-0.5 bg-red-50 text-red-500 border border-red-100 rounded-md text-[8px] font-black uppercase tracking-widest">❌ Ditolak</span>
+                            @endif
+                        </div>
+                    </div>
+                    @empty
+                    <div class="py-12 text-center">
+                        <i class="fas fa-inbox text-neutral-200 text-3xl mb-3 block"></i>
+                        <p class="text-[11px] font-bold text-neutral-400 uppercase tracking-widest">Belum ada riwayat withdraw</p>
+                    </div>
+                    @endforelse
+                </div>
+
+                @if($withdraws->hasPages())
+                <div class="pt-4 border-t border-neutral-50">
+                    {{ $withdraws->links() }}
+                </div>
+                @endif
+            </div>
         </div>
     </div>
 </div>
-
-<script>
-function confirmApprove(id, user, amount) {
-    Swal.fire({
-        title: 'APPROVE WITHDRAW?',
-        html: `<p class='text-sm font-bold text-gray-500'>Pastikan Anda sudah transfer <span class='text-emerald-600 font-black'>${amount}</span> ke member <span class='text-gray-900 font-black'>${user}</span>.</p>`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#10b981',
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: 'YA, SUDAH TRANSFER',
-        cancelButtonText: 'BATAL'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            document.getElementById('approve-form-' + id).submit();
-        }
-    });
-}
-function showRejectModal(id) {
-    document.getElementById('rejectForm').action = `/admin/withdrawals/${id}/reject`; // Sesuaikan prefix route Anda
-    document.getElementById('rejectModal').classList.remove('hidden');
-}
-function closeRejectModal() {
-    document.getElementById('rejectModal').classList.add('hidden');
-}
-</script>
 @endsection

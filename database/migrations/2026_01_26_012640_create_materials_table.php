@@ -9,33 +9,28 @@
         /**
          * Run the migrations.
          */
-    public function up()
+    public function up(): void
     {
-        // Jika belum ada tabelnya
-    Schema::create('materials', function (Blueprint $table) {
-        $table->id('material_id');
-
-        $table->string('material_name');
-        $table->enum('material_type', [
-            'roll', 
-            'sheet', 
-            'pcs'
-        ]);
-        // ukuran media (penting untuk stiker & banner)
-        $table->decimal('width_cm', 10, 2)->nullable();
-        $table->decimal('height_cm', 10, 2)->nullable();
-        $table->decimal('spacing_mm',5,2)->default(0);
-
-        // stok dalam unit (lembar / meter)
-        $table->decimal('stock_qty', 10, 2)->default(0);
-
-        $table->foreignId('unit_id')
-            ->constrained('units', 'unit_id')
-            ->onDelete('cascade');
-
-        $table->timestamps();
-    });
-
+        Schema::create('materials', function (Blueprint $table) {
+            $table->id('material_id');
+ 
+            $table->string('material_name');
+            $table->enum('material_type', ['roll', 'sheet', 'pcs']);
+ 
+            // Ukuran media (penting untuk stiker & banner)
+            $table->decimal('width_cm', 10, 2)->nullable();
+            $table->decimal('height_cm', 10, 2)->nullable();
+            $table->decimal('spacing_mm', 5, 2)->default(0);
+ 
+            // Stok
+            $table->decimal('stock', 10, 2)->default(0);
+            $table->decimal('min_stock', 10, 2)->default(10.00);
+            $table->string('stock_unit')->default('m²');
+ 
+            $table->foreignId('unit_id')->constrained('units', 'unit_id')->onDelete('cascade');
+ 
+            $table->timestamps();
+        });
     }
         /**
          * Reverse the migrations.

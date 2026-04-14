@@ -70,11 +70,13 @@ class Materials extends Model
             if ($material->wasChanged('stock') && $material->stock <= $material->min_stock) {
                 
                 // Pastikan admin mendapatkan notifikasi (Sesuaikan user_id admin kamu)
+                
                 Notification::create([
-                    'user_id' => 1, 
+                                'type'    => 'stock',  // ← tambah ini
+
                     'title'   => '⚠️ Stok Kritis: ' . $material->material_name,
                     'message' => "Sisa bahan tinggal {$material->stock}, sudah mencapai batas aman ({$material->min_stock}).",
-                    'url'     => '/admin/materials', // Ubah sesuai route menu material kamu
+                    'url'     => '/materials', // Ubah sesuai route menu material kamu
                     'is_read' => false,
                 ]);
             }

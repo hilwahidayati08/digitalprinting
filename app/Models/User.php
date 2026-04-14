@@ -20,11 +20,10 @@ class User extends Authenticatable
         'full_name',
         'role',
         'google_id',
-        'is_member',               // komisi
-        'saldo_komisi',            // komisi
-        'member_tier',             // tier: regular / plus / premium
-        'commission_rate_override',// override rate khusus per member (opsional, diset admin)
-        'total_spent',             // total belanja kumulatif untuk hitung tier otomatis
+        'is_member',
+        'saldo_komisi',
+        'member_tier',
+        'total_spent',
     ];
 
     protected $hidden = [
@@ -35,33 +34,15 @@ class User extends Authenticatable
         'password'                 => 'hashed',
         'is_member'                => 'boolean',
         'saldo_komisi'             => 'decimal:2',
-        'commission_rate_override' => 'decimal:2',
         'total_spent'              => 'decimal:2',
     ];
 
     // ==========================================
     // RELASI
     // ==========================================
-// Tambahkan di Model User.php
-public function getActiveRate()
-{
-    // Cek Jalur Khusus dulu
-    if ($this->commission_rate_override) {
-        return $this->commission_rate_override;
-    }
-
-    // Ambil rate dari tabel settings
-    $setup = \App\Models\Settings::first();
-
-    return match($this->member_tier) {
-        'premium' => $setup->rate_premium, // Mengambil 15,0
-        'plus'    => $setup->rate_plus,    // Mengambil 10,0
-        default   => $setup->rate_regular, // Mengambil 5,0
-    };
-}
-    public function profile()
+    public function notifications()
     {
-        return $this->hasOne(Profiles::class, 'user_id');
+        return $this->hasMany(Notification::class, 'user_id', 'user_id');
     }
 
     public function shippings()
@@ -115,10 +96,6 @@ public function getActiveRate()
         return 'Rp ' . number_format($this->saldo_komisi, 0, ',', '.');
     }
 
-    /**
-     * Label tier untuk ditampilkan di UI
-     * Contoh: $user->tier_label → "⭐ Plus"
-     */
     public function getTierLabelAttribute(): string
     {
         return match ($this->member_tier) {
@@ -128,10 +105,6 @@ public function getActiveRate()
         };
     }
 
-    /**
-     * Warna badge tier (Tailwind class)
-     * Contoh: $user->tier_color → "bg-blue-100 text-blue-700"
-     */
     public function getTierColorAttribute(): string
     {
         return match ($this->member_tier) {
@@ -140,40 +113,42 @@ public function getActiveRate()
             default   => 'bg-gray-100 text-gray-600',
         };
     }
-
-    /**
-     * Rate komisi aktif untuk member ini.
-     * Prioritas: override admin → rate tier dari settings
-     * Contoh: $user->active_commission_rate → 10.0
-     */
-    public function getActiveCommissionRateAttribute(): float
+        public function isGoogleAccount(): bool
     {
-        // Jika admin set override khusus untuk member ini, pakai itu
-        if (!is_null($this->commission_rate_override)) {
-            return (float) $this->commission_rate_override;
-        }
-
-        // Ambil rate sesuai tier dari settings
-        $settings = Settings::first();
-        if (!$settings) return 5.0;
-
-        return match ($this->member_tier) {
-            'plus'    => (float) $settings->rate_plus,
-            'premium' => (float) $settings->rate_premium,
-            default   => (float) $settings->rate_regular,
-        };
+        return !is_null($this->google_id) && is_null($this->password);
     }
 
+public function hasPassword(): bool
+{
+    return !is_null($this->password);
+}
+
+// TAMBAHKAN method baru ini di User.php
+public function getCommissionRate(): float
+{
+    $settings = Settings::first();
+    if (!$settings) return 0.0;
+
+    return match ($this->member_tier) {
+        'premium' => (float) $settings->rate_premium,
+        'plus'    => (float) $settings->rate_plus,
+        default   => (float) $settings->rate_regular,
+    };
+}
     // ==========================================
-    // METHODS KOMISI
+    // METHODS
     // ==========================================
 
     /**
-     * Tambah saldo komisi + otomatis catat di saldo_logs
+     * Tambah saldo komisi + catat di saldo_logs
      */
-    public function tambahSaldo(float $amount, string $description, string $refType = null, int $refId = null): void
-    {
-        $saldoBefore = $this->saldo_komisi;
+    public function tambahSaldo(
+        float $amount,
+        string $description,
+        string $refType = null,
+        int $refId = null
+    ): void {
+        $saldoBefore = (float) $this->saldo_komisi;
         $saldoAfter  = $saldoBefore + $amount;
 
         $this->increment('saldo_komisi', $amount);
@@ -191,17 +166,21 @@ public function getActiveRate()
     }
 
     /**
-     * Kurangi saldo komisi + otomatis catat di saldo_logs
+     * Kurangi saldo komisi + catat di saldo_logs
      *
      * @throws \Exception jika saldo tidak cukup
      */
-    public function kurangiSaldo(float $amount, string $description, string $refType = null, int $refId = null): void
-    {
+    public function kurangiSaldo(
+        float $amount,
+        string $description,
+        string $refType = null,
+        int $refId = null
+    ): void {
         if ($this->saldo_komisi < $amount) {
             throw new \Exception('Saldo komisi tidak mencukupi.');
         }
 
-        $saldoBefore = $this->saldo_komisi;
+        $saldoBefore = (float) $this->saldo_komisi;
         $saldoAfter  = $saldoBefore - $amount;
 
         $this->decrement('saldo_komisi', $amount);
@@ -218,38 +197,25 @@ public function getActiveRate()
         ]);
     }
 
-    /**
-     * Cek apakah saldo cukup untuk nominal tertentu
-     */
     public function saldoCukup(float $amount): bool
     {
         return $this->saldo_komisi >= $amount;
     }
 
     /**
-     * Cek apakah user memenuhi syarat untuk ajukan member
-     * Syarat: minimal X order ATAU total belanja minimal Rp X (dari settings)
+     * Syarat daftar member: DIHAPUS per permintaan.
+     * Sekarang siapapun boleh daftar member — return true saja.
+     * Method ini tetap ada agar view/controller yang sudah pakai
+     * bisaAjukanMember() tidak error.
      */
     public function bisaAjukanMember(): bool
     {
-        $settings = Settings::first();
-        if (!$settings) return false;
-
-        $totalOrders = $this->orders()
-            ->whereIn('status', ['paid', 'processing', 'shipped', 'delivered'])
-            ->count();
-
-        $totalSpent = $this->orders()
-            ->whereIn('status', ['paid', 'processing', 'shipped', 'delivered'])
-            ->sum('total');
-
-        return $totalOrders >= $settings->member_min_orders
-            || $totalSpent  >= $settings->member_min_spent;
+        return true;
     }
 
     /**
-     * Update total_spent dan naikan tier otomatis.
-     * Dipanggil setiap kali order statusnya jadi paid.
+     * Hitung ulang total_spent & naikkan tier otomatis.
+     * Dipanggil setiap kali order selesai dibayar (status paid).
      */
     public function updateTierOtomatis(): void
     {
@@ -258,12 +224,11 @@ public function getActiveRate()
         $settings = Settings::first();
         if (!$settings) return;
 
-        // Hitung ulang total belanja dari semua order paid
+        // Hitung dari DB langsung agar selalu akurat
         $totalSpent = $this->orders()
             ->whereIn('status', ['paid', 'processing', 'shipped', 'delivered'])
             ->sum('total');
 
-        // Tentukan tier baru
         $tierBaru = 'regular';
         if ($totalSpent >= $settings->tier_premium_min) {
             $tierBaru = 'premium';

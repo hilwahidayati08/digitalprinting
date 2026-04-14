@@ -101,13 +101,13 @@
 
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-bold text-gray-500 mb-2">Panjang Default (m)</label>
-                                <input type="number" step="0.01" name="default_width_cm" value="{{ old('default_width_cm', 1.00) }}" 
+                                <label class="block text-xs font-bold text-gray-500 mb-2">Panjang Default (cm)</label>
+                                <input type="number" step="0.01" name="default_width_cm" value="{{ old('default_width_cm') }}" 
                                        class="w-full px-4 py-3 bg-white border border-blue-200 rounded-2xl text-sm font-bold">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 mb-2">Lebar Default (m)</label>
-                                <input type="number" step="0.01" name="default_height_cm" value="{{ old('default_height_cm', 1.00) }}" 
+                                <input type="number" step="0.01" name="default_height_cm" value="{{ old('default_height_cm') }}" 
                                        class="w-full px-4 py-3 bg-white border border-blue-200 rounded-2xl text-sm font-bold">
                             </div>
                         </div>

@@ -25,14 +25,6 @@
         </div>
     </div>
 
-    {{-- Alert --}}
-    @if(session('success'))
-        <div class="mb-6 flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl shadow-sm">
-            <i class="fas fa-check-circle"></i>
-            <p class="text-sm font-black uppercase tracking-tight">{{ session('success') }}</p>
-        </div>
-    @endif
-
     {{-- Table --}}
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
@@ -66,11 +58,7 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="px-6 py-4">
-                            <p class="text-[11px] font-bold text-gray-500 leading-relaxed max-w-xs italic">
-                                "{{ $req->rejection_reason ?? 'Tidak mencantumkan alasan' }}"
-                            </p>
-                        </td>
+
                         <td class="px-6 py-4 text-center">
                             @if($req->status === 'pending')
                                 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-50 text-amber-600 text-[10px] font-black uppercase border border-amber-100">
@@ -122,11 +110,8 @@
             </table>
         </div>
         
-        @if($requests->hasPages())
-            <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/20">
-                {{ $requests->withQueryString()->links() }}
-            </div>
-        @endif
+@include('partials.admin.pagination', ['paginator' => $requests->withQueryString()])
+
     </div>
 </div>
 @endsection

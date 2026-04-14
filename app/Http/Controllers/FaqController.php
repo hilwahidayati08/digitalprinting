@@ -61,37 +61,40 @@ public function index(Request $request)
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Faqs $faq)
-    {
-        return view('faqs.edit', compact('faq'));
-    }
+public function edit($id)
+{
+    $faq = Faqs::where('faq_id', $id)->firstOrFail();
+    return view('faqs.edit', compact('faq'));
+}
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Faqs $faq)
-    {
-        $request->validate([
-            'question' => 'required|string|max:255',
-            'answer' => 'required|string',
-        ]);
+public function update(Request $request, $id)
+{
+    $faq = Faqs::where('faq_id', $id)->firstOrFail();
+    
+    $request->validate([
+        'question' => 'nullable|string|max:255',
+        'answer' => 'nullable|string',
+    ]);
 
-        Faqs::create([
-            'question'  => $request->question,
-            'answer'    => $request->answer,
-            'is_active' => $request->has('is_active') ? true : false,
-        ]);
+    $faq->update([
+        'question'  => $request->question,
+        'answer'    => $request->answer,
+        'is_active' => $request->has('is_active') ? true : false,
+    ]);
 
-        return redirect()->route('faqs.index')->with('success', 'FAQ berhasil diperbarui!');
-    }
+    return redirect()->route('faqs.index')->with('success', 'FAQ berhasil diperbarui!');
+}
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Faqs $faq)
-    {
-        $faq->delete();
+public function destroy($id)
+{
+    // Cari data berdasarkan ID (sesuaikan primary key Anda, di view Anda menggunakan faq_id)
+    $faq = Faqs::where('faq_id', $id)->firstOrFail();
+    
+    $faq->delete();
 
-        return redirect()->route('faqs.index')->with('success', 'FAQ berhasil dihapus!');
-    }
+    return redirect()->route('faqs.index')->with('success', 'FAQ berhasil dihapus');
+}
 }

@@ -21,11 +21,7 @@ class Settings extends Model
         'time_open',
         'time_close',
         'address',
-
-        // Syarat pengajuan member
-        'member_min_orders',  // minimal jumlah order
-        'member_min_spent',   // minimal total belanja
-
+        
         // Rate diskon per tier
         'rate_regular',       // diskon % untuk tier Regular
         'rate_plus',          // diskon % untuk tier Plus

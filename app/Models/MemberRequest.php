@@ -11,7 +11,6 @@ class MemberRequest extends Model
     protected $fillable = [
         'user_id',
         'status',
-        'rejection_reason',
         'processed_at',
     ];
 
@@ -81,7 +80,6 @@ class MemberRequest extends Model
     {
         $this->update([
             'status'           => 'rejected',
-            'rejection_reason' => $reason,
             'processed_at'     => now(),
         ]);
     }

@@ -6,7 +6,7 @@
                 <i class="fas fa-print text-white text-base"></i>
             </div>
             <div class="flex flex-col">
-                <h2 class="text-white font-bold tracking-tight text-base leading-none">PrintMaster</h2>
+                <h2 class="text-white font-bold tracking-tight text-base leading-none">CetakKilat</h2>
                 <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-1">Nusan Digital</span>
             </div>
         </div>

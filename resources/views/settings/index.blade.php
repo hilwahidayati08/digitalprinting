@@ -38,54 +38,6 @@
             {{-- KOLOM KIRI --}}
             <div class="lg:col-span-1 space-y-6">
 
-                {{-- Syarat Pengajuan Member --}}
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="p-5 border-b border-gray-50">
-                        <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-xl bg-orange-100 flex items-center justify-center">
-                                <i class="fas fa-user-check text-orange-600 text-sm"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-sm font-bold text-gray-900">Syarat Pengajuan Member</h3>
-                                <p class="text-xs text-gray-400">Penuhi salah satu syarat ini</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="p-5 space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-                                <i class="fas fa-shopping-bag text-orange-400 mr-1"></i> Minimal Jumlah Order
-                            </label>
-                            <div class="relative">
-                                <input type="number" name="member_min_orders"
-                                    value="{{ old('member_min_orders', $settings->member_min_orders ?? 5) }}"
-                                    min="1"
-                                    class="w-full border border-gray-200 rounded-xl px-4 py-3 pr-16 text-sm font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition-all">
-                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-bold">order</span>
-                            </div>
-                            @error('member_min_orders') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-                                <i class="fas fa-money-bill text-orange-400 mr-1"></i> ATAU Min. Total Belanja
-                            </label>
-                            <div class="relative">
-                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-bold">Rp</span>
-                                <input type="number" name="member_min_spent"
-                                    value="{{ old('member_min_spent', $settings->member_min_spent ?? 500000) }}"
-                                    min="0" step="10000"
-                                    class="w-full border border-gray-200 rounded-xl px-4 py-3 pl-10 text-sm font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition-all">
-                            </div>
-                            @error('member_min_spent') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
-                        </div>
-                        <div class="p-3 bg-orange-50 rounded-xl">
-                            <p class="text-xs text-orange-600 leading-relaxed">
-                                <i class="fas fa-info-circle mr-1"></i>
-                                User bisa ajukan member jika sudah <strong>min. X order</strong> <u>atau</u> total belanja <strong>min. Rp X</strong>.
-                            </p>
-                        </div>
-                    </div>
-                </div>
 
                 {{-- Jam Operasional --}}
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">

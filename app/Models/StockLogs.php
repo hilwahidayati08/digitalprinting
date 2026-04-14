@@ -11,7 +11,6 @@ class StockLogs extends Model
 
     protected $fillable = [
         'material_id',
-        'order_id', 
         'type',
         'amount',
         'last_stock',

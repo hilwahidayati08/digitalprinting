@@ -1,145 +1,197 @@
-@extends('layouts.member')
+@extends('admin.admin')
 
-@section('member_content')
-<div class="max-w-5xl mx-auto px-4 mb-8 space-y-6">
+@section('title', 'Edit Data User')
 
-    {{-- Profile Form --}}
-    <div class="bg-white rounded-[1.5rem] shadow-sm border border-neutral-100 overflow-hidden">
-
-        {{-- Header --}}
-        <div class="bg-gradient-to-br from-primary-600 to-secondary-600 px-8 py-8 flex items-center justify-between relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
-            <div class="absolute bottom-0 left-0 w-20 h-20 bg-black/5 rounded-full translate-y-8 -translate-x-6"></div>
-
-            <div class="relative z-10 flex items-center gap-4">
-                <div class="w-12 h-12 bg-white/20 backdrop-blur-md border border-white/30 rounded-xl flex items-center justify-center shadow-lg">
-                    <i class="fas fa-user-gear text-white text-xl"></i>
-                </div>
-                <div>
-                    <h2 class="text-white text-xl font-black italic uppercase tracking-tight leading-none">Pengaturan Profil</h2>
-                    <p class="text-white/70 text-[11px] mt-2 font-medium italic">Kelola identitas akun dan keamanan kata sandi Anda</p>
-                </div>
-            </div>
+@section('content')
+<div class="max-full mx-auto px-4 py-8">
+    
+    {{-- Header & Breadcrumbs --}}
+    <div class="mb-8 flex justify-between items-end">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Edit Data User</h1>
+            <p class="text-sm text-gray-500">Kelola informasi akun, hak akses, dan pengaturan finansial member.</p>
         </div>
+        <div class="text-right">
+            <span class="px-4 py-2 bg-gray-100 rounded-2xl text-xs font-bold text-gray-600 uppercase tracking-widest">
+                ID User: #{{ $user->user_id }}
+            </span>
+        </div>
+    </div>
 
-        {{-- Form Body --}}
-        <form action="{{ route('users.update', Auth::user()->user_id) }}" method="POST" class="p-6 lg:p-8">
-            @csrf
-            @method('PUT')
+    {{-- Notifikasi Error --}}
+    @if ($errors->any())
+        <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-xl shadow-sm">
+            <p class="font-bold mb-1 italic text-sm">Ada kesalahan input:</p>
+            <ul class="text-xs list-disc list-inside space-y-1">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
-            <div class="space-y-10">
+    <form action="{{ route('users.update', $user->user_id) }}" method="POST">
+        @csrf
+        @method('PUT')
+        
+        <div class="grid grid-cols-12 gap-8">
 
-                {{-- Bagian 01: Identitas Akun --}}
-                <div class="space-y-5">
-                    <div class="flex items-center gap-2 border-b border-neutral-50 pb-2">
-                        <div class="w-1 h-4 bg-primary-600 rounded-full"></div>
-                        <h3 class="text-[11px] font-black text-neutral-800 uppercase tracking-widest">Identitas Akun</h3>
+            {{-- KOLOM KIRI: Informasi Akun & Profil --}}
+            <div class="col-span-12 lg:col-span-8 space-y-6">
+                
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 space-y-6">
+                    <div class="flex items-center gap-3 border-b border-gray-50 pb-4">
+                        <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900">Informasi Profil & Login</h3>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {{-- Username --}}
-                        <div class="space-y-1.5">
-                            <label class="text-[10px] font-bold text-neutral-400 uppercase ml-1 tracking-wider">Username</label>
-                            <div class="relative">
-                                <i class="fas fa-at absolute left-4 top-1/2 -translate-y-1/2 text-neutral-300 text-xs"></i>
-                                <input type="text" name="username" value="{{ old('username', Auth::user()->username) }}"
-                                       class="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl focus:border-primary-600 focus:bg-white outline-none transition-all font-bold text-neutral-700 text-sm @error('username') border-red-300 @enderror">
-                            </div>
-                            @error('username') <span class="text-red-400 text-[10px] italic font-bold ml-1">{{ $message }}</span> @enderror
-                        </div>
-
-                        {{-- Nama Lengkap --}}
-                        <div class="space-y-1.5">
-                            <label class="text-[10px] font-bold text-neutral-400 uppercase ml-1 tracking-wider">Nama Lengkap</label>
-                            <div class="relative">
-                                <i class="fas fa-signature absolute left-4 top-1/2 -translate-y-1/2 text-neutral-300 text-xs"></i>
-                                <input type="text" name="full_name" value="{{ old('full_name', Auth::user()->full_name) }}"
-                                       class="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl focus:border-primary-600 focus:bg-white outline-none transition-all font-bold text-neutral-700 text-sm @error('full_name') border-red-300 @enderror"
-                                       placeholder="Nama sesuai KTP">
-                            </div>
-                            @error('full_name') <span class="text-red-400 text-[10px] italic font-bold ml-1">{{ $message }}</span> @enderror
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Username <span class="text-red-500">*</span></label>
+                            <input type="text" name="username" value="{{ old('username', $user->username) }}" required
+                                   class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all">
                         </div>
 
                         {{-- Email --}}
-                        <div class="space-y-1.5">
-                            <label class="text-[10px] font-bold text-neutral-400 uppercase ml-1 tracking-wider">Alamat Email</label>
-                            <div class="relative">
-                                <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-neutral-300 text-xs"></i>
-                                <input type="email" name="useremail" value="{{ old('useremail', Auth::user()->useremail) }}"
-                                       class="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl focus:border-primary-600 focus:bg-white outline-none transition-all font-bold text-neutral-700 text-sm @error('useremail') border-red-300 @enderror">
-                            </div>
-                            @error('useremail') <span class="text-red-400 text-[10px] italic font-bold ml-1">{{ $message }}</span> @enderror
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Email Address <span class="text-red-500">*</span></label>
+                            <input type="email" name="useremail" value="{{ old('useremail', $user->useremail) }}" required
+                                   class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {{-- Nama Lengkap --}}
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Nama Lengkap</label>
+                            <input type="text" name="full_name" value="{{ old('full_name', $user->full_name) }}"
+                                   class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 outline-none">
                         </div>
 
-                        {{-- No. WhatsApp --}}
-                        <div class="space-y-1.5">
-                            <label class="text-[10px] font-bold text-neutral-400 uppercase ml-1 tracking-wider">No. WhatsApp</label>
-                            <div class="relative">
-                                <i class="fab fa-whatsapp absolute left-4 top-1/2 -translate-y-1/2 text-neutral-300 text-sm"></i>
-                                <input type="text" name="no_telp" value="{{ old('no_telp', Auth::user()->no_telp) }}"
-                                       class="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl focus:border-primary-600 focus:bg-white outline-none transition-all font-bold text-neutral-700 text-sm @error('no_telp') border-red-300 @enderror"
-                                       placeholder="08xxxxxxxxxx">
-                            </div>
-                            @error('no_telp') <span class="text-red-400 text-[10px] italic font-bold ml-1">{{ $message }}</span> @enderror
+                        {{-- No Telp --}}
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Nomor WhatsApp/Telp</label>
+                            <input type="text" name="no_telp" value="{{ old('no_telp', $user->no_telp) }}"
+                                   class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 outline-none"
+                                   placeholder="0812xxxx">
                         </div>
+                    </div>
+
+                    {{-- Password --}}
+                    <div class="p-6 bg-orange-50/50 rounded-3xl border border-orange-100 mt-4">
+                        <label class="block text-sm font-bold text-orange-800 mb-1">Ganti Password</label>
+                        <p class="text-[11px] text-orange-600 mb-3 italic">*Biarkan kosong jika tidak ingin mengubah password user.</p>
+                        <input type="password" name="password" 
+                               class="w-full px-4 py-3 bg-white border border-orange-200 rounded-2xl focus:ring-4 focus:ring-orange-500/10 outline-none"
+                               placeholder="••••••••">
                     </div>
                 </div>
 
-                {{-- Bagian 02: Keamanan Akun --}}
-                <div class="space-y-5">
-                    <div class="flex items-center gap-2 border-b border-neutral-50 pb-2">
-                        <div class="w-1 h-4 bg-primary-600 rounded-full"></div>
-                        <h3 class="text-[11px] font-black text-neutral-800 uppercase tracking-widest">Keamanan Akun</h3>
+                {{-- DATA KEUANGAN / TRANSAKSI --}}
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+                    <div class="flex items-center gap-3 border-b border-gray-50 pb-4 mb-6">
+                        <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900">Data Keuangan & Komisi</h3>
                     </div>
 
-                    <div class="p-4 bg-primary-50/50 rounded-2xl border border-primary-100">
-                        <label class="text-[10px] font-bold text-primary-700 uppercase tracking-wider flex items-center gap-2 mb-3">
-                            <i class="fas fa-key"></i> Ganti Password Baru
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Saldo Komisi (IDR)</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-400 font-bold">Rp</span>
+                                <input type="number" name="saldo_komisi" value="{{ old('saldo_komisi', $user->saldo_komisi) }}"
+                                       class="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl font-black text-emerald-600 outline-none">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Total Belanja (Total Spent)</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-400 font-bold">Rp</span>
+                                <input type="number" name="total_spent" value="{{ old('total_spent', $user->total_spent) }}"
+                                       class="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl font-black text-blue-600 outline-none">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- KOLOM KANAN: Membership & Hak Akses --}}
+            <div class="col-span-12 lg:col-span-4 space-y-6">
+                
+                {{-- Membership Status --}}
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 space-y-5">
+                    <h3 class="text-sm font-bold text-gray-900 flex items-center gap-2">
+                        <i class="fas fa-id-card text-blue-500"></i> Status Membership
+                    </h3>
+
+                    <div class="space-y-4">
+                        {{-- Is Member Toggle --}}
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                            <div class="flex flex-col">
+                                <span class="text-xs font-bold text-gray-700 uppercase">Status Member</span>
+                                <span class="text-[10px] text-gray-400">Aktifkan fitur komisi</span>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="hidden" name="is_member" value="0">
+                                <input type="checkbox" name="is_member" value="1" class="sr-only peer" {{ $user->is_member ? 'checked' : '' }}>
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                            </label>
+                        </div>
+
+                        {{-- Tier --}}
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Member Tier</label>
+<select name="member_tier" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-bold outline-none">
+    <option value="" {{ is_null($user->member_tier) ? 'selected' : '' }}>-- Tanpa Tier --</option>
+    <option value="regular" {{ $user->member_tier == 'regular' ? 'selected' : '' }}>Regular</option>
+    <option value="plus" {{ $user->member_tier == 'plus' ? 'selected' : '' }}>Plus</option>
+    <option value="premium" {{ $user->member_tier == 'premium' ? 'selected' : '' }}>Premium</option>
+</select>
+                        </div>
+
+                </div>
+
+                {{-- Hak Akses (Role) --}}
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-sm font-bold text-gray-900 mb-4">Level Akses (Role)</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="relative flex flex-col p-4 border rounded-2xl cursor-pointer transition-all {{ $user->role == 'user' ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-100' }}">
+                            <input type="radio" name="role" value="user" class="sr-only" {{ $user->role == 'user' ? 'checked' : '' }}>
+                            <span class="text-xs font-black {{ $user->role == 'user' ? 'text-blue-700' : 'text-gray-500' }}">USER</span>
+                            <span class="text-[10px] text-gray-400 mt-1">Pelanggan</span>
                         </label>
-                        <input type="password" name="password"
-                               class="w-full px-4 py-3 bg-white border border-primary-100 rounded-xl outline-none focus:border-primary-600 focus:ring-4 focus:ring-primary-500/10 transition-all font-bold text-neutral-700 text-sm"
-                               placeholder="Masukkan password baru jika ingin diubah">
-                        <p class="text-[10px] text-primary-400 italic font-medium mt-2 ml-1">Biarkan kosong jika tetap menggunakan password saat ini.</p>
+                        <label class="relative flex flex-col p-4 border rounded-2xl cursor-pointer transition-all {{ $user->role == 'admin' ? 'bg-red-50 border-red-200' : 'bg-gray-50 border-gray-100' }}">
+                            <input type="radio" name="role" value="admin" class="sr-only" {{ $user->role == 'admin' ? 'checked' : '' }}>
+                            <span class="text-xs font-black {{ $user->role == 'admin' ? 'text-red-700' : 'text-gray-500' }}">ADMIN</span>
+                            <span class="text-[10px] text-gray-400 mt-1">Pengelola</span>
+                        </label>
                     </div>
                 </div>
 
                 {{-- Action Buttons --}}
-                <div class="pt-6 border-t border-neutral-50 flex flex-col md:flex-row items-center justify-between gap-4">
-                    <div class="flex items-center gap-2">
-                        <div class="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
-                        <p class="text-[10px] text-neutral-400 font-bold uppercase tracking-widest">
-                            Aktif sejak {{ Auth::user()->created_at->translatedFormat('F Y') }}
-                        </p>
-                    </div>
-                    <button type="submit" class="w-full md:w-auto px-10 py-3.5 bg-neutral-900 text-white font-black rounded-xl hover:bg-primary-600 transition-all shadow-lg hover:shadow-primary-600/20 uppercase tracking-widest text-[10px] flex items-center justify-center gap-2">
-                        <span>Simpan Perubahan</span>
-                        <i class="fas fa-check-circle"></i>
+                <div class="space-y-3">
+                    <button type="submit" class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black shadow-lg shadow-blue-200 transition-all transform active:scale-95">
+                        UPDATE DATA USER
                     </button>
+                    <a href="{{ route('users.index') }}" class="w-full block py-4 bg-white border border-gray-200 text-gray-500 rounded-2xl text-center text-sm font-bold hover:bg-gray-50 transition-all">
+                        Batal & Kembali
+                    </a>
                 </div>
 
-            </div>
-        </form>
-    </div>
-
-    {{-- Shortcut Card Alamat --}}
-    <a href="{{ route('shippings.index') }}"
-       class="block bg-white rounded-[1.5rem] shadow-sm border border-neutral-100 overflow-hidden hover:border-primary-200 transition-all group">
-        <div class="p-6 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-primary-50 border border-primary-100 rounded-xl flex items-center justify-center group-hover:bg-primary-600 transition-all">
-                    <i class="fas fa-map-location-dot text-primary-600 group-hover:text-white transition-all text-lg"></i>
-                </div>
-                <div>
-                    <h4 class="text-[12px] font-black text-neutral-800 uppercase tracking-tight">Atur Buku Alamat</h4>
-                    <p class="text-[10px] text-neutral-400 font-medium mt-0.5 italic">Kelola daftar alamat pengiriman pesanan Anda.</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-1.5 text-neutral-400 group-hover:text-primary-600 transition-all font-black text-[10px] uppercase tracking-widest">
-                <span class="hidden md:inline">Buka</span>
-                <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
             </div>
         </div>
-    </a>
-
+    </form>
 </div>
+
+<style>
+    /* Custom Radio Styling jika diperlukan */
+    input[type="radio"]:checked + span {
+        --tw-text-opacity: 1;
+    }
+</style>
 @endsection

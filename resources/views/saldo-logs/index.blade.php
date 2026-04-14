@@ -1,125 +1,102 @@
-@extends('admin.admin')
+@extends('admin.admin') {{-- sesuaikan dengan layout frontend kamu --}}
 
-@section('title', 'Riwayat Saldo Komisi - Admin Panel')
+@section('title', 'Riwayat Saldo Komisi')
 
 @section('content')
-<div class="max-full">
-    {{-- Header --}}
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <div>
-            <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Riwayat Saldo Komisi</h2>
-            <p class="text-sm text-gray-500 font-medium italic">Semua mutasi saldo komisi seluruh member</p>
-        </div>
-        
-        <div class="flex items-center gap-3">
-            {{-- Filter Form --}}
-            <form action="{{ route('admin.saldo-logs.index') }}" method="GET" class="flex flex-wrap md:flex-nowrap gap-2">
-                <input type="text" name="search" value="{{ request('search') }}"
-                       placeholder="Cari Username..."
-                       class="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all w-40 shadow-sm">
-                
-                <select name="type" onchange="this.form.submit()"
-                        class="pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-700 appearance-none shadow-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500">
-                    <option value="">Semua Tipe</option>
-                    <option value="credit" {{ request('type') === 'credit' ? 'selected' : '' }}>➕ Kredit (Masuk)</option>
-                    <option value="debit" {{ request('type') === 'debit' ? 'selected' : '' }}>➖ Debit (Keluar)</option>
-                </select>
+<div class="max-w-3xl mx-auto px-4 py-8 space-y-6">
 
-                @if(request()->hasAny(['search', 'type']))
-                    <a href="{{ route('admin.saldo-logs.index') }}" 
-                       class="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl text-xs font-black uppercase transition-all flex items-center">
-                        Reset
-                    </a>
-                @endif
-            </form>
+    {{-- Saldo Card --}}
+    <div class="bg-gradient-to-br from-primary-600 to-primary-700 rounded-2xl p-6 text-white shadow-lg shadow-primary-200">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-primary-200 text-sm font-medium">Total Saldo Komisi</p>
+                <p class="text-3xl font-bold mt-1">{{ $user->saldo_komisi_formatted }}</p>
+            </div>
+            <div class="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center">
+                <i class="fas fa-coins text-2xl text-white/80"></i>
+            </div>
+        </div>
+        <div class="flex gap-3 mt-4">
+            <a href="{{ route('withdrawal.index') }}"
+               class="flex-1 py-2 bg-white/20 hover:bg-white/30 text-white text-sm font-semibold rounded-xl text-center transition-all">
+                <i class="fas fa-paper-plane mr-1"></i> Withdraw
+            </a>
+            <a href="{{ route('orders.index') }}"
+               class="flex-1 py-2 bg-white/10 hover:bg-white/20 text-white/80 text-sm font-semibold rounded-xl text-center transition-all">
+                <i class="fas fa-shopping-bag mr-1"></i> Order Saya
+            </a>
         </div>
     </div>
 
-    {{-- Table Container --}}
+    {{-- Filter --}}
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+        <form action="{{ route('saldo.logs') }}" method="GET" class="flex gap-3">
+            <select name="type" onchange="this.form.submit()"
+                    class="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all">
+                <option value="">Semua Transaksi</option>
+                <option value="credit" {{ request('type') === 'credit' ? 'selected' : '' }}>➕ Komisi Masuk</option>
+                <option value="debit"  {{ request('type') === 'debit'  ? 'selected' : '' }}>➖ Saldo Keluar</option>
+            </select>
+            @if(request('type'))
+                <a href="{{ route('saldo.logs') }}"
+                   class="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl text-sm transition-all flex items-center">
+                    Reset
+                </a>
+            @endif
+        </form>
+    </div>
+
+    {{-- Log List --}}
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse whitespace-nowrap">
-                <thead>
-                    <tr class="bg-gray-50/50 border-b border-gray-100">
-                        <th class="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-wider text-center w-16">No</th>
-                        <th class="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-wider">Member</th>
-                        <th class="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-wider text-center">Tipe</th>
-                        <th class="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-wider text-right">Nominal</th>
-                        <th class="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-wider text-right">Saldo Akhir</th>
-                        <th class="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-wider">Keterangan</th>
-                        <th class="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-wider text-center">Waktu</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50">
-                    @forelse($logs as $log)
-                    <tr class="hover:bg-gray-50/30 transition-colors group">
-                        <td class="px-6 py-4 text-center">
-                            <span class="text-sm font-bold text-gray-400 italic">
-                                {{ ($logs->currentPage() - 1) * $logs->perPage() + $loop->iteration }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-black text-xs border border-blue-100">
-                                    {{ strtoupper(substr($log->user->username, 0, 1)) }}
-                                </div>
-                                <div>
-                                    <div class="text-sm font-black text-gray-900 uppercase tracking-tight">{{ $log->user->username }}</div>
-                                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter italic">ID: #{{ $log->user->user_id }}</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 text-center">
-                            @if($log->type === 'credit')
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase border border-emerald-100">
-                                    <i class="fas fa-plus-circle text-[9px]"></i> Kredit
-                                </span>
-                            @else
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 text-[10px] font-black uppercase border border-rose-100">
-                                    <i class="fas fa-minus-circle text-[9px]"></i> Debit
-                                </span>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4 text-right">
-                            <span class="text-sm font-black tracking-tight {{ $log->type === 'credit' ? 'text-emerald-600' : 'text-rose-600' }}">
-                                {{ $log->type === 'credit' ? '+' : '-' }} Rp {{ number_format($log->amount, 0, ',', '.') }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 text-right">
-                            <div class="text-[10px] font-bold text-gray-400 leading-none mb-1 uppercase tracking-tighter">After Transaksi</div>
-                            <div class="text-sm font-black text-gray-800 font-mono tracking-tighter">
-                                Rp {{ number_format($log->saldo_after, 0, ',', '.') }}
-                            </div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="max-w-[250px] whitespace-normal">
-                                <span class="text-[11px] font-bold text-gray-600 leading-relaxed italic">
-                                    "{{ $log->description ?? '-' }}"
-                                </span>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 text-center">
-                            <div class="text-[11px] font-black text-gray-900 uppercase leading-none mb-1">{{ $log->created_at->format('d M Y') }}</div>
-                            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">{{ $log->created_at->format('H:i') }} WIB</div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="7" class="px-6 py-20 text-center text-gray-400 italic font-bold uppercase tracking-widest">
-                            <i class="fas fa-history text-3xl mb-3 block opacity-20"></i>
-                            Belum ada riwayat transaksi.
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+        <div class="p-6 border-b border-gray-50">
+            <h2 class="text-base font-bold text-gray-900">Riwayat Transaksi Komisi</h2>
+        </div>
+
+        @if($logs->count())
+        <div class="divide-y divide-gray-50">
+            @foreach($logs as $log)
+            <div class="px-6 py-4 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    {{-- Icon --}}
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0
+                        {{ $log->type === 'credit' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-500' }}">
+                        <i class="fas {{ $log->type === 'credit' ? 'fa-arrow-down' : 'fa-arrow-up' }} text-sm"></i>
+                    </div>
+                    {{-- Info --}}
+                    <div>
+                        <p class="text-sm font-semibold text-gray-900">
+                            {{ $log->description ?? ($log->type === 'credit' ? 'Komisi diterima' : 'Saldo digunakan') }}
+                        </p>
+                        <p class="text-xs text-gray-400">{{ $log->created_at->format('d M Y, H:i') }}</p>
+                    </div>
+                </div>
+                {{-- Nominal & Saldo --}}
+                <div class="text-right flex-shrink-0">
+                    <p class="text-sm font-bold {{ $log->type === 'credit' ? 'text-emerald-600' : 'text-red-500' }}">
+                        {{ $log->amount_formatted }}
+                    </p>
+                    <p class="text-xs text-gray-400 font-mono">
+                        Saldo: Rp {{ number_format($log->saldo_after, 0, ',', '.') }}
+                    </p>
+                </div>
+            </div>
+            @endforeach
         </div>
 
         @if($logs->hasPages())
-        <div class="px-6 py-4 border-t border-gray-50 bg-gray-50/20">
+        <div class="px-6 py-4 border-t border-gray-50">
             {{ $logs->withQueryString()->links() }}
         </div>
         @endif
+
+        @else
+        <div class="px-6 py-16 text-center text-gray-400">
+            <i class="fas fa-history text-4xl text-gray-200 mb-3 block"></i>
+            <p class="text-sm font-medium text-gray-500">Belum ada riwayat komisi.</p>
+            <p class="text-xs text-gray-400 mt-1">Komisi akan masuk setelah order kamu selesai dibayar.</p>
+        </div>
+        @endif
     </div>
+
 </div>
 @endsection

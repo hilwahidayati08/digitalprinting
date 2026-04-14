@@ -14,8 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // CSRF exception untuk Midtrans (sudah ada sebelumnya)
         $middleware->validateCsrfTokens(except: [
-            '/midtrans/callback',
-        ]);
+        'midtrans/callback',
+        'midtrans/notification',
+                ]);
 
         // 👇 Tambah ini saja
         $middleware->alias([

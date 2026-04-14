@@ -1,219 +1,204 @@
-<script defer src="https://unpkg.com/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
-<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
 <aside 
-    id="sidebar" 
-    x-data="{ 
-        mobileOpen: false,
-        openMenu: '{{ request()->is('admin/products*', 'categories*', 'materials*', 'units*', 'stocklogs*') ? 'produksi' : (request()->is('member-requests*', 'withdrawals*', 'admin-saldo-logs*') ? 'affiliate' : (request()->is('portofolios*', 'heros*', 'faqs*', 'services*') ? 'cms' : '')) }}'
-    }"
-    @open-sidebar.window="mobileOpen = true"
-    :class="mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
-    class="w-64 bg-[#0f172a] text-slate-300 flex flex-col fixed md:sticky top-0 h-screen transition-all duration-300 ease-in-out border-r border-slate-800 z-[9999]"
+    id="sidebar"
+    :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+    class="fixed top-0 left-0 w-64 h-full bg-[#0f172a] text-slate-300 flex flex-col z-50 transition-transform duration-300 ease-in-out md:relative md:translate-x-0 border-r border-slate-800 shadow-xl md:shadow-none"
 >
-    <div class="pointer-events-none absolute inset-0 opacity-[0.03] z-0" style="background-image: linear-gradient(rgba(148,163,184,1) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,1) 1px, transparent 1px); background-size: 32px 32px;"></div>
 
-    <div class="relative z-10 h-[68px] flex items-center px-5 shrink-0 border-b border-white/5 bg-[#0f172a]">
-        <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-600 to-blue-800 shadow-lg shadow-blue-900/50">
-                <i class="fas fa-print text-white text-[15px]"></i>
-            </div>
-            <div class="flex flex-col leading-none">
-                <span class="text-white font-bold tracking-tight text-[15px]">PrintMaster</span>
-                <span class="text-[9px] font-extrabold uppercase tracking-[0.2em] text-slate-500 mt-[3px]">Admin Panel</span>
-            </div>
+    {{-- Subtle grid texture overlay --}}
+    <div class="pointer-events-none absolute inset-0 opacity-[0.03]" style="background-image: linear-gradient(rgba(148,163,184,1) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,1) 1px, transparent 1px); background-size: 32px 32px;"></div>
+
+{{-- ─── Logo / Brand ──────────────────────────────────────── --}}
+<div class="relative h-[68px] flex items-center px-5 shrink-0" style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+    <div class="flex items-center gap-3">
+        {{-- Menggunakan BG Slate-100 (Putih Abu) agar outline hitam printer tetap terlihat tajam --}}
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 overflow-hidden bg-slate-100 shadow-[0_0_15px_rgba(37,99,235,0.5)] border border-white/20">
+            <img src="{{ asset('storage/logo-cetakkilat2.png') }}" 
+                 alt="CetakKilat Logo" 
+                 class="w-full h-full object-contain p-1.5">
         </div>
-        <button @click="mobileOpen = false" class="md:hidden ml-auto text-slate-500 hover:text-white p-2">
-            <i class="fas fa-times"></i>
-        </button>
+        
+        <div class="flex flex-col leading-none">
+            <span class="text-white font-bold tracking-tight text-[15px]">CetakKilat</span>
+            <span class="text-[9px] font-extrabold uppercase tracking-[0.18em] text-slate-400 mt-[3px]">Admin Panel</span>
+        </div>
     </div>
 
-    <nav class="relative z-10 flex-1 overflow-y-auto py-6 px-3 space-y-7 custom-scrollbar">
-        
+    {{-- Mobile close button --}}
+    <button @click="sidebarOpen = false" class="md:hidden ml-auto text-slate-500 hover:text-white transition-colors p-1">
+        <i class="fas fa-times text-base"></i>
+    </button>
+</div>
+    {{-- ─── Navigation ─────────────────────────────────────────── --}}
+    <nav class="flex-1 overflow-y-auto py-5 px-3 space-y-7" 
+         style="scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent;">
+
+        {{-- Utama --}}
         <div>
-            <p class="px-4 mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500/80">Main Menu</p>
-            <div class="space-y-1">
-                <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                    <i class="fas fa-th-large"></i> <span>Dashboard</span>
+            <p class="px-3 mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Ringkasan</p>
+            <div class="space-y-0.5">
+                <a href="{{ route('dashboard') }}" 
+                   class="nav-item flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150 group {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                    <i class="fas fa-chart-line w-4 text-center text-[13px] shrink-0 transition-colors"></i>
+                    <span>Dashboard</span>
                 </a>
-                <a href="{{ route('admin.orders.index') }}" class="nav-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
-                    <i class="fas fa-shopping-basket"></i> 
-                    <span class="flex-1">Pesanan</span>
-                    @php $pendingCount = \App\Models\Orders::where('status', 'paid')->count(); @endphp
-                    @if($pendingCount > 0)
-                        <span class="badge-blue">{{ $pendingCount }}</span>
-                    @endif
+
+                <a href="{{ route('admin.orders.index') }}" 
+                   class="nav-item flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150 group {{ request()->routeIs('admin.orders.*') && !request()->routeIs('admin.orders.report') ? 'active' : '' }}">
+                    <i class="fas fa-shopping-cart w-4 text-center text-[13px] shrink-0 transition-colors"></i>
+                    <span class="flex-1">Pesanan Masuk</span>
+                    <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded-md" 
+                          style="background: #2563eb; color: #fff; letter-spacing: 0.05em; box-shadow: 0 2px 6px rgba(37,99,235,0.4);">
+                        {{ \App\Models\Orders::where('status', 'paid')->count() }}
+                    </span>
+                </a>
+
+                <a href="{{ route('admin.orders.report') }}" 
+                   class="nav-item flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150 group {{ request()->routeIs('admin.orders.report') ? 'active' : '' }}">
+                    <i class="fas fa-file-invoice-dollar w-4 text-center text-[13px] shrink-0 transition-colors"></i>
+                    <span>Laporan Penjualan</span>
                 </a>
             </div>
         </div>
 
-        <div class="space-y-1">
-            <p class="px-4 mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500/80">Inventory</p>
-            <div class="dropdown-container">
-                <button type="button" 
-                        @click="openMenu = (openMenu === 'produksi' ? '' : 'produksi')" 
-                        class="nav-link w-full flex items-center justify-between bg-transparent border-none cursor-pointer outline-none transition-all"
-                        :class="openMenu === 'produksi' ? 'text-white bg-white/5' : ''">
-                    <div class="flex items-center gap-3 pointer-events-none">
-                        <i class="fas fa-boxes"></i> <span>Master Data</span>
-                    </div>
-                    <i class="fas fa-chevron-right text-[10px] transition-transform duration-300 pointer-events-none" :class="openMenu === 'produksi' ? 'rotate-90' : ''"></i>
-                </button>
-                
-                <div x-show="openMenu === 'produksi'" x-collapse x-cloak class="dropdown-content">
-                    <a href="{{ route('products.index') }}" class="sub-link {{ request()->routeIs('products.*') ? 'active' : '' }}">Katalog Produk</a>
-                    <a href="{{ route('categories.index') }}" class="sub-link {{ request()->routeIs('categories.*') ? 'active' : '' }}">Kategori Cetak</a>
-                    <a href="{{ route('materials.index') }}" class="sub-link {{ request()->routeIs('materials.*') ? 'active' : '' }}">Stok Bahan</a>
-                    <a href="{{ route('units.index') }}" class="sub-link {{ request()->routeIs('units.*') ? 'active' : '' }}">Satuan Unit</a>
-                    <a href="{{ route('stocklogs.index') }}" class="sub-link {{ request()->routeIs('stocklogs.*') ? 'active' : '' }}">Riwayat Stok</a>
-                </div>
+        {{-- Produksi & Stok --}}
+        @php $openProduksi = request()->is('admin/products*', 'categories*', 'materials*', 'units*', 'stocklogs*') ? 'true' : 'false'; @endphp
+        <div x-data="{ open: {{ $openProduksi }} }">
+            <p class="px-3 mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Inventori & Produk</p>
+
+            <button type="button" @click="open = !open"
+                    class="nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150 text-left">
+                <i class="fas fa-boxes w-4 text-center text-[13px] shrink-0"></i>
+                <span class="flex-1">Master Data</span>
+                <svg :class="open ? 'rotate-90 text-blue-400' : 'rotate-0 text-slate-500'"
+                     class="w-3 h-3 shrink-0 transition-transform duration-200"
+                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                </svg>
+            </button>
+
+            <div x-show="open" class="mt-1 ml-3 pl-4 space-y-0.5 border-l border-slate-800">
+                <a href="{{ route('products.index') }}" class="sub-nav-item flex items-center gap-2 px-2 py-2 text-[12.5px] rounded-md transition-all duration-150 {{ request()->routeIs('products.*') ? 'active' : '' }}">
+                    <i class="fas fa-box w-3.5 text-center text-[11px] opacity-70"></i><span>Katalog Produk</span>
+                </a>
+                <a href="{{ route('categories.index') }}" class="sub-nav-item flex items-center gap-2 px-2 py-2 text-[12.5px] rounded-md transition-all duration-150 {{ request()->routeIs('categories.*') ? 'active' : '' }}">
+                    <i class="fas fa-tag w-3.5 text-center text-[11px] opacity-70"></i><span>Kategori Cetak</span>
+                </a>
+                <a href="{{ route('materials.index') }}" class="sub-nav-item flex items-center gap-2 px-2 py-2 text-[12.5px] rounded-md transition-all duration-150 {{ request()->routeIs('materials.*') ? 'active' : '' }}">
+                    <i class="fas fa-layer-group w-3.5 text-center text-[11px] opacity-70"></i><span>Stok Bahan</span>
+                </a>
+                <a href="{{ route('units.index') }}" class="sub-nav-item flex items-center gap-2 px-2 py-2 text-[12.5px] rounded-md transition-all duration-150 {{ request()->routeIs('units.*') ? 'active' : '' }}">
+                    <i class="fas fa-ruler w-3.5 text-center text-[11px] opacity-70"></i><span>Satuan Unit</span>
+                </a>
+                <a href="{{ route('stocklogs.index') }}" class="sub-nav-item flex items-center gap-2 px-2 py-2 text-[12.5px] rounded-md transition-all duration-150 {{ request()->routeIs('stocklogs.*') ? 'active' : '' }}">
+                    <i class="fas fa-history w-3.5 text-center text-[11px] opacity-70"></i><span>Log Riwayat Stok</span>
+                </a>
             </div>
         </div>
 
-        <div class="space-y-1">
-            <p class="px-4 mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500/80">Finance</p>
-            <div class="dropdown-container">
-                <button type="button" 
-                        @click="openMenu = (openMenu === 'affiliate' ? '' : 'affiliate')" 
-                        class="nav-link w-full flex items-center justify-between bg-transparent border-none cursor-pointer outline-none transition-all"
-                        :class="openMenu === 'affiliate' ? 'text-white bg-white/5' : ''">
-                    <div class="flex items-center gap-3 pointer-events-none">
-                        <i class="fas fa-hand-holding-usd"></i> <span>Affiliate</span>
-                    </div>
-                    <i class="fas fa-chevron-right text-[10px] transition-transform duration-300 pointer-events-none" :class="openMenu === 'affiliate' ? 'rotate-90' : ''"></i>
-                </button>
-                
-                <div x-show="openMenu === 'affiliate'" x-collapse x-cloak class="dropdown-content">
-                    <a href="{{ route('member-requests.index') }}" class="sub-link {{ request()->routeIs('member-requests.*') ? 'active' : '' }}">Request Member</a>
-                    <a href="{{ route('admin.withdrawals.index') }}" class="sub-link {{ request()->routeIs('admin.withdrawals.*') ? 'active' : '' }}">Pencairan Komisi</a>
-                </div>
+        {{-- Konten & Marketing --}}
+        @php $openKonten = request()->is('heros*', 'faqs*', 'services*', 'portofolios*') ? 'true' : 'false'; @endphp
+        <div x-data="{ open: {{ $openKonten }} }">
+            <p class="px-3 mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Konten Web</p>
+
+            <button type="button" @click="open = !open"
+                    class="nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150 text-left">
+                <i class="fas fa-edit w-4 text-center text-[13px] shrink-0"></i>
+                <span class="flex-1">Manajemen Konten</span>
+                <svg :class="open ? 'rotate-90 text-blue-400' : 'rotate-0 text-slate-500'" class="w-3 h-3 shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </button>
+
+            <div x-show="open" class="mt-1 ml-3 pl-4 space-y-0.5 border-l border-slate-800">
+                <a href="{{ route('heros.index') }}" class="sub-nav-item flex items-center gap-2 px-2 py-2 text-[12.5px] rounded-md {{ request()->routeIs('heros.*') ? 'active' : '' }}">
+                    <i class="fas fa-images w-3.5 text-center text-[11px] opacity-70"></i><span>Banner Promo</span>
+                </a>
+                <a href="{{ route('portofolios.index') }}" class="sub-nav-item flex items-center gap-2 px-2 py-2 text-[12.5px] rounded-md {{ request()->routeIs('portofolios.*') ? 'active' : '' }}">
+                    <i class="fas fa-briefcase w-3.5 text-center text-[11px] opacity-70"></i><span>Portofolio</span>
+                </a>
+                <a href="{{ route('faqs.index') }}" class="sub-nav-item flex items-center gap-2 px-2 py-2 text-[12.5px] rounded-md {{ request()->routeIs('faqs.*') ? 'active' : '' }}">
+                    <i class="fas fa-question-circle w-3.5 text-center text-[11px] opacity-70"></i><span>FAQ</span>
+                </a>
             </div>
         </div>
 
-        <div class="space-y-1">
-            <p class="px-4 mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500/80">Content</p>
-            <div class="dropdown-container">
-                <button type="button" 
-                        @click="openMenu = (openMenu === 'cms' ? '' : 'cms')" 
-                        class="nav-link w-full flex items-center justify-between bg-transparent border-none cursor-pointer outline-none transition-all"
-                        :class="openMenu === 'cms' ? 'text-white bg-white/5' : ''">
-                    <div class="flex items-center gap-3 pointer-events-none">
-                        <i class="fas fa-laptop-code"></i> <span>Website CMS</span>
-                    </div>
-                    <i class="fas fa-chevron-right text-[10px] transition-transform duration-300 pointer-events-none" :class="openMenu === 'cms' ? 'rotate-90' : ''"></i>
-                </button>
-                
-                <div x-show="openMenu === 'cms'" x-collapse x-cloak class="dropdown-content">
-                    <a href="{{ route('portofolios.index') }}" class="sub-link {{ request()->routeIs('portofolios.*') ? 'active' : '' }}">Portfolio</a>
-                    <a href="{{ route('services.index') }}" class="sub-link {{ request()->routeIs('services.*') ? 'active' : '' }}">Layanan</a>
-                    <a href="{{ route('heros.index') }}" class="sub-link {{ request()->routeIs('heros.*') ? 'active' : '' }}">Banner</a>
-                    <a href="{{ route('faqs.index') }}" class="sub-link {{ request()->routeIs('faqs.*') ? 'active' : '' }}">FAQ</a>
-                </div>
+        {{-- Affiliate & Keuangan --}}
+        @php $openAffiliate = request()->is('member-requests*', 'withdrawals*', 'admin-saldo-logs*') ? 'true' : 'false'; @endphp
+        <div x-data="{ open: {{ $openAffiliate }} }">
+            <p class="px-3 mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Affiliate & Keuangan</p>
+
+            <button type="button" @click="open = !open"
+                    class="nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150 text-left">
+                <i class="fas fa-users-cog w-4 text-center text-[13px] shrink-0"></i>
+                <span class="flex-1">Member & Komisi</span>
+                <svg :class="open ? 'rotate-90 text-blue-400' : 'rotate-0 text-slate-500'" class="w-3 h-3 shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </button>
+
+            <div x-show="open" class="mt-1 ml-3 pl-4 space-y-0.5 border-l border-slate-800">
+                <a href="{{ route('member-requests.index') }}" class="sub-nav-item flex items-center gap-2 px-2 py-2 text-[12.5px] rounded-md {{ request()->routeIs('member-requests.*') ? 'active' : '' }}">
+                    <i class="fas fa-user-clock w-3.5 text-center text-[11px] opacity-70"></i>
+                    <span class="flex-1">Permintaan Member</span>
+                    <span class="bg-blue-600 text-[10px] px-1.5 rounded-full text-white">{{ \App\Models\MemberRequest::where('status', 'pending')->count() }}</span>
+                </a>
+                <a href="{{ route('admin.withdrawals.index') }}" class="sub-nav-item flex items-center gap-2 px-2 py-2 text-[12.5px] rounded-md {{ request()->routeIs('admin.withdrawals.*') ? 'active' : '' }}">
+                    <i class="fas fa-wallet w-3.5 text-center text-[11px] opacity-70"></i><span>Pencairan Dana</span>
+                </a>
+                <a href="{{ route('admin.saldo-logs.index') }}" class="sub-nav-item flex items-center gap-2 px-2 py-2 text-[12.5px] rounded-md {{ request()->routeIs('admin.saldo-logs.*') ? 'active' : '' }}">
+                    <i class="fas fa-receipt w-3.5 text-center text-[11px] opacity-70"></i><span>Log Saldo</span>
+                </a>
             </div>
         </div>
 
-        <div class="pt-4 border-t border-white/5">
-            <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
-                <i class="fas fa-user-shield"></i> <span>Kelola Akun</span>
-            </a>
-            <a href="{{ route('settings.index') }}" class="nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }}">
-                <i class="fas fa-cog"></i> <span>Pengaturan Situs</span>
-            </a>
+        {{-- Konfigurasi --}}
+        <div>
+            <p class="px-3 mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Sistem</p>
+            <div class="space-y-0.5">
+                <a href="{{ route('users.index') }}" class="nav-item flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150 group {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                    <i class="fas fa-user-shield w-4 text-center text-[13px] shrink-0"></i>
+                    <span>Kelola Pengguna</span>
+                </a>
+                <a href="{{ route('settings.index') }}" class="nav-item flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150 group {{ request()->routeIs('settings.*') ? 'active' : '' }}">
+                    <i class="fas fa-cog w-4 text-center text-[13px] shrink-0"></i>
+                    <span>Pengaturan Toko</span>
+                </a>
+            </div>
         </div>
+
     </nav>
+    
+{{-- Bottom Section (Logout/Profile) --}}
+<div class="p-3 border-t border-white/[0.06]">
+    <div class="flex items-center gap-2.5 px-3 py-2.5 rounded-[10px] bg-white/[0.04] border border-white/[0.07]">
+        
+        {{-- Avatar --}}
+        <div class="w-[34px] h-[34px] rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-[13px] font-medium text-white uppercase shrink-0 tracking-wide">
+            {{ substr(Auth::user()->username, 0, 1) }}
+        </div>
 
-    <div class="shrink-0 p-4 border-t border-white/5 bg-[#0f172a] relative z-20">
+        {{-- Info --}}
+        <div class="flex-1 min-w-0">
+            <p class="text-[12.5px] font-medium text-slate-100 truncate leading-snug">
+                {{ Auth::user()->username }}
+            </p>
+            <p class="text-[10.5px] text-slate-500 mt-0.5 flex items-center gap-1 leading-none">
+                <span class="w-[5px] h-[5px] rounded-full bg-green-500 shrink-0"></span>
+                Admin Panel
+            </p>
+        </div>
+
+        {{-- Logout Button --}}
         <form action="{{ route('logout') }}" method="POST">
             @csrf
-            <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[13px] font-semibold text-red-400 bg-red-500/5 hover:bg-red-500/10 border border-red-500/20 transition-all group">
-                <i class="fas fa-sign-out-alt group-hover:scale-110 transition-transform"></i> <span>Keluar Sistem</span>
+            <button type="submit"
+                    title="Logout"
+                    class="w-[30px] h-[30px] rounded-lg bg-transparent border border-white/[0.08] flex items-center justify-center text-slate-500 hover:bg-red-500/[0.12] hover:border-red-500/30 hover:text-red-400 transition-all duration-150 shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
             </button>
         </form>
+
     </div>
+</div>
 </aside>
-
-<style>
-/* --- UTILITIES --- */
-[x-cloak] { display: none !important; }
-
-/* --- CUSTOM SCROLLBAR (Elegan & Modern) --- */
-.custom-scrollbar::-webkit-scrollbar {
-    width: 4px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 10px;
-}
-.custom-scrollbar:hover::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #2563eb;
-}
-
-/* --- NAV LINKS --- */
-.nav-link {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 16px;
-    border-radius: 12px;
-    font-size: 13.5px;
-    font-weight: 500;
-    color: #94a3b8;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    text-decoration: none;
-}
-.nav-link i {
-    width: 20px;
-    text-align: center;
-    font-size: 14px;
-    opacity: 0.7;
-}
-.nav-link:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: #f1f5f9;
-}
-.nav-link.active {
-    background: linear-gradient(to right, rgba(37, 99, 235, 0.15), transparent);
-    color: #60a5fa;
-    border-left: 3px solid #2563eb;
-    border-radius: 4px 12px 12px 4px;
-}
-.nav-link.active i { color: #60a5fa; opacity: 1; }
-
-/* --- DROPDOWN STYLES --- */
-.dropdown-content {
-    margin-top: 4px;
-    margin-left: 22px;
-    padding-left: 16px;
-    border-left: 1px solid rgba(255, 255, 255, 0.08);
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-.sub-link {
-    padding: 8px 12px;
-    font-size: 12.5px;
-    color: #64748b;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-    text-decoration: none;
-}
-.sub-link:hover { color: #f1f5f9; background: rgba(255, 255, 255, 0.03); }
-.sub-link.active { color: #60a5fa; font-weight: 600; background: rgba(37, 99, 235, 0.05); }
-
-/* --- BADGE --- */
-.badge-blue {
-    background: #2563eb;
-    color: white;
-    font-size: 10px;
-    font-weight: 800;
-    padding: 2px 8px;
-    border-radius: 6px;
-    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
-}
-</style>

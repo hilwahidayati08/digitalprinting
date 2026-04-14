@@ -22,7 +22,7 @@ class StockLogsController extends Controller
 
     // Menampilkan log terbaru di atas dengan pagination
     // withQueryString() penting agar saat pindah halaman, keyword pencarian tidak hilang
-    $logs = $query->latest()->paginate(10)->withQueryString();
+    $logs = $query->latest()->paginate(5)->withQueryString();
 
     return view('stock_logs.index', compact('logs'));
 }

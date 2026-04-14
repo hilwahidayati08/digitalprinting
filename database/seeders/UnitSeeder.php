@@ -17,7 +17,7 @@ class UnitSeeder extends Seeder
         ];
 
         foreach ($units as $unit) {
-            Unit::create([
+            Units::create([
                 'name' => $unit,
                 'is_active' => 1,
             ]);

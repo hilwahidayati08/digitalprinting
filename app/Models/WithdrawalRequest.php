@@ -15,7 +15,6 @@ class WithdrawalRequest extends Model
         'account_number',
         'account_name',
         'status',
-        'rejection_reason',
         'processed_at',
     ];
 
@@ -77,38 +76,40 @@ class WithdrawalRequest extends Model
      *
      * @throws \Exception jika saldo tidak mencukupi
      */
-    public function approve(): void
-    {
-        $user = $this->user->fresh(); // refresh untuk saldo terbaru
+public function approve(): void
+{
+    $user = $this->user->fresh();
 
-        if (! $user->saldoCukup($this->amount)) {
-            throw new \Exception('Saldo komisi user tidak mencukupi untuk dicairkan.');
-        }
-
-        $user->kurangiSaldo(
-            amount:      $this->amount,
-            description: "Withdraw ke {$this->bank_name} {$this->account_number}",
-            refType:     'withdrawal',
-            refId:       $this->withdrawal_id,
-        );
-
-        $this->update([
-            'status'       => 'approved',
-            'processed_at' => now(),
-        ]);
+    if (!$user->saldoCukup($this->amount)) {
+        throw new \Exception('Saldo komisi user tidak mencukupi untuk dicairkan.');
     }
+
+    $user->kurangiSaldo(
+        amount:      $this->amount,
+        description: "Withdraw ke {$this->bank_name} {$this->account_number}",
+        refType:     'withdrawal',
+        refId:       $this->withdrawal_id,
+    );
+
+    $this->update([
+        'status'       => 'approved',
+        'processed_at' => now(),
+    ]);
+
+    // ← TAMBAHKAN INI
+    \App\Models\Notification::create([
+        'type'    => 'withdrawal',
+        'title'   => '💸 Withdraw Disetujui',
+        'message' => "Withdraw {$this->amount_formatted} untuk {$user->username} telah disetujui.",
+        'url'     => '/admin/withdrawals',
+        'is_read' => 0,
+    ]);
+}
 
     /**
      * Admin reject withdraw — saldo tidak terpengaruh
      */
-    public function reject(string $reason = null): void
-    {
-        $this->update([
-            'status'           => 'rejected',
-            'rejection_reason' => $reason,
-            'processed_at'     => now(),
-        ]);
-    }
+
 
     // ==========================================
     // SCOPES

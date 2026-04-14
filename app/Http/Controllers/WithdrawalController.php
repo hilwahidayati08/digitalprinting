@@ -4,22 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Models\WithdrawalRequest;
 use Illuminate\Http\Request;
-
+use App\Models\User;
 class WithdrawalController extends Controller
 {
     // USER
    public function index(Request $request)
 {
-    $query = WithdrawalRequest::with('user');
+    $user = auth()->user();
+    
+    $query = WithdrawalRequest::where('user_id', $user->user_id);
 
     // Filter Status
     if ($request->filled('status')) {
         $query->where('status', $request->status);
     }
 
-    $withdraws = $query->latest()->paginate(10)->withQueryString();
+    $withdraws = $query->latest()->paginate(5)->withQueryString();
 
-    return view('admin.withdrawals.index', compact('withdraws'));
+    return view('withdrawals.index', compact('withdraws', 'user'));
 }
 
     public function store(Request $request)
@@ -56,22 +58,31 @@ class WithdrawalController extends Controller
             'status'         => 'pending',
         ]);
 
+        \App\Models\Notification::create([
+            'type'    => 'withdrawal',
+            'title'   => '💸 Request Withdraw Baru',
+            'message' => $user->username . ' mengajukan withdraw Rp ' . number_format($request->amount) . '.',
+            'url'     => '/withdrawals',
+            'is_read' => 0,
+        ]);
+
         return back()->with('success', 'Request withdraw berhasil dikirim! Tunggu konfirmasi admin.');
     }
 
     // ADMIN
-    public function adminIndex(Request $request)
-    {
-        $query = WithdrawalRequest::with('user');
+public function adminIndex(Request $request)
+{
+    $withdraws = WithdrawalRequest::with('user')
+        ->when($request->filled('status'), fn($q) => $q->where('status', $request->status))
+        ->latest()
+        ->paginate(5);
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
+    $members = User::where('is_member', true)  // ← pastikan ini ada
+        ->orderBy('username')
+        ->get();
 
-        $withdraws = $query->latest()->paginate(15);
-
-        return view('withdrawals.index', compact('withdraws')); // ✅ fix
-    }
+    return view('withdrawals.admin_index', compact('withdraws', 'members')); // ← pastikan nama view benar
+}
 
     public function approve($id)
     {
@@ -83,30 +94,22 @@ class WithdrawalController extends Controller
 
         try {
             $withdrawal->approve();
+            \App\Models\Notification::create([
+    'type'    => 'withdrawal',
+    'title'   => '✅ Withdraw Disetujui',
+    'message' => 'Withdraw ' . $withdrawal->amount_formatted . ' untuk ' . $withdrawal->user->username . ' telah disetujui.',
+    'url'     => '/withdrawals',
+    'is_read' => 0,
+]);
             return back()->with('success',
                 "Withdraw {$withdrawal->amount_formatted} untuk {$withdrawal->user->username} berhasil disetujui."
             );
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
+
+        
     }
 
-    public function reject(Request $request, $id)
-    {
-        $request->validate([
-            'rejection_reason' => 'nullable|string|max:500',
-        ]);
 
-        $withdrawal = WithdrawalRequest::with('user')->findOrFail($id);
-
-        if (!$withdrawal->is_pending) {
-            return back()->with('error', 'Request ini sudah diproses sebelumnya.');
-        }
-
-        $withdrawal->reject($request->rejection_reason);
-
-        return back()->with('success',
-            "Request withdraw {$withdrawal->user->username} berhasil ditolak."
-        );
-    }
 }

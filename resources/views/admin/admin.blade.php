@@ -1,18 +1,24 @@
 <!DOCTYPE html>
 <html lang="id" class="h-full">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin Panel - Digital Printing')</title>
-    
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS via CDN (SEMENTARA untuk testing) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -82,133 +88,320 @@
             }
         }
     </script>
-    
+
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
     <!-- Custom CSS -->
     <style>
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        /* Flash Alert */
+        .flash-alert {
+            position: relative;
+            overflow: hidden;
+            animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        
+
+        .flash-alert.dismissing {
+            animation: slideUp 0.3s ease-in forwards;
+        }
+
+        .flash-progress {
+            transition: width linear;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                opacity: 1;
+                transform: translateY(0);
+                max-height: 100px;
+            }
+
+            to {
+                opacity: 0;
+                transform: translateY(-16px);
+                max-height: 0;
+                padding: 0;
+                margin: 0;
+            }
         }
-        
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
         /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
         }
-        
+
         ::-webkit-scrollbar-track {
             background: #f1f5f9;
             border-radius: 4px;
         }
-        
+
         ::-webkit-scrollbar-thumb {
             background: #cbd5e1;
             border-radius: 4px;
         }
-        
+
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
+
+        /* Overlay untuk mobile sidebar */
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 40;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Prevent body scroll when sidebar open on mobile */
+        body.sidebar-open {
+            overflow: hidden;
+        }
+
+        [x-cloak] {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar-overlay {
+                backdrop-filter: blur(2px);
+            }
+        }
+
+        /* --- Kunci: Layout satu halaman dengan scroll internal --- */
+        /* html dan body diatur menjadi full height dengan overflow hidden */
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Container utama flex dengan height penuh, tidak overflow */
+        .app-container {
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Sidebar memiliki overflow auto untuk scroll internal */
+        #sidebar {
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+        }
+
+        /* Area konten utama: flex column dengan height penuh */
+        .main-content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        /* Area main yang bisa di-scroll (termasuk footer di dalamnya) */
+        .main-scrollable {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* Konten dalam scrollable area */
+        .scrollable-content {
+            padding: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .scrollable-content {
+                padding: 1.5rem;
+            }
+        }
     </style>
-    
+
     @stack('styles')
 </head>
-<body class="font-sans bg-gray-50 text-gray-800 min-h-screen">
-    <!-- Mobile Menu Button -->
-    <button id="mobile-menu-button" class="md:hidden fixed top-4 left-4 z-50 p-2 bg-primary-600 text-white rounded-lg shadow-lg">
-        <i class="fas fa-bars text-xl"></i>
-    </button>
 
-    <!-- Main Layout -->
-    <div class="min-h-screen flex">
-        <!-- Sidebar -->
+<body x-data="{ sidebarOpen: false }" :class="{ 'sidebar-open': sidebarOpen }" class="font-sans bg-gray-50 text-gray-800">
+
+    {{-- Container utama dengan height penuh dan overflow hidden --}}
+    <div class="app-container">
+
+        {{-- OVERLAY untuk mobile --}}
+        <div x-show="sidebarOpen" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0" @click="sidebarOpen = false" class="sidebar-overlay md:hidden"
+            style="display: none;"></div>
+
+        {{-- Include Sidebar (sudah dimodifikasi untuk scroll internal) --}}
         @include('partials.admin.sidebar')
-        
-        <!-- Main Content -->
-        <div class="flex-1 flex flex-col md:ml-0 w-full">
-            <!-- Header -->
-            @include('partials.admin.header')
-            
-            <!-- Main Content Area -->
-            <main class="flex-1 p-4 md:p-6 bg-gray-50">
-                <!-- Breadcrumb & Page Title -->
-                
-                <!-- Flash Messages -->
-                <div class="mb-6">
-                    @if(session('success'))
-                        <div class="p-4 bg-green-50 border border-green-200 rounded-xl mb-4 animate-fade-in">
-                            <div class="flex items-center">
-                                <i class="fas fa-check-circle text-green-600 mr-3"></i>
-                                <p class="text-green-800 font-medium">{{ session('success') }}</p>
-                                <button class="ml-auto text-green-600" onclick="this.parentElement.parentElement.remove()">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        </div>
-                    @endif
-                </div>
-                
-                <!-- Main Content -->
-                <div class="animate-fade-in">
-                    @yield('content')
-                </div>
 
+        {{-- Main Content Area dengan scroll internal (termasuk footer) --}}
+        <div class="main-content-area">
+
+            {{-- Header (static, tidak ikut scroll) --}}
+            @include('partials.admin.header')
+
+            {{-- Area scrollable yang berisi konten + footer --}}
+            <main class="main-scrollable bg-gray-50 flex flex-col">
+<div class="scrollable-content flex-1">
+                    {{-- Flash Messages --}}
+                    <div id="flash-container" class="mb-4 space-y-3">
+                        @if (session('success'))
+                            <div
+                                class="flash-alert flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl shadow-sm">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-sm">
+                                    <i class="fas fa-check text-xs"></i>
+                                </div>
+                                <p class="text-sm font-semibold flex-1">{{ session('success') }}</p>
+                                <button onclick="dismissAlert(this.parentElement)"
+                                    class="text-emerald-400 hover:text-emerald-600 transition-colors ml-auto">
+                                    <i class="fas fa-times text-xs"></i>
+                                </button>
+                                <div class="flash-progress absolute bottom-0 left-0 h-0.5 bg-emerald-400 rounded-full"
+                                    style="width: 100%"></div>
+                            </div>
+                        @endif
+
+                        @if (session('error'))
+                            <div
+                                class="flash-alert flex items-center gap-3 p-4 bg-red-50 border border-red-100 text-red-700 rounded-2xl shadow-sm">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center shadow-sm">
+                                    <i class="fas fa-times text-xs"></i>
+                                </div>
+                                <p class="text-sm font-semibold flex-1">{{ session('error') }}</p>
+                                <button onclick="dismissAlert(this.parentElement)"
+                                    class="text-red-400 hover:text-red-600 transition-colors ml-auto">
+                                    <i class="fas fa-times text-xs"></i>
+                                </button>
+                                <div class="flash-progress absolute bottom-0 left-0 h-0.5 bg-red-400 rounded-full"
+                                    style="width: 100%"></div>
+                            </div>
+                        @endif
+
+                        @if (session('warning'))
+                            <div
+                                class="flash-alert flex items-center gap-3 p-4 bg-amber-50 border border-amber-100 text-amber-700 rounded-2xl shadow-sm">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 bg-amber-500 text-white rounded-full flex items-center justify-center shadow-sm">
+                                    <i class="fas fa-exclamation text-xs"></i>
+                                </div>
+                                <p class="text-sm font-semibold flex-1">{{ session('warning') }}</p>
+                                <button onclick="dismissAlert(this.parentElement)"
+                                    class="text-amber-400 hover:text-amber-600 transition-colors ml-auto">
+                                    <i class="fas fa-times text-xs"></i>
+                                </button>
+                                <div class="flash-progress absolute bottom-0 left-0 h-0.5 bg-amber-400 rounded-full"
+                                    style="width: 100%"></div>
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- Page Content --}}
+                    <div class="animate-fade-in">
+                        @yield('content')
+                    </div>
+                </div>
                 @stack('pagination')
+
+                {{-- Include Footer - SEKARANG IKUT TER-SCROLL --}}
+                @include('partials.admin.footer')
+
+
             </main>
-            
-            <!-- Footer -->
-            @include('partials.admin.footer')
+
         </div>
+
     </div>
 
-    <!-- Mobile Menu Overlay -->
-    <div id="mobile-menu-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- JavaScript -->
     <script>
-        // Mobile sidebar toggle
-        document.addEventListener('DOMContentLoaded', function() {
-            const mobileMenuButton = document.getElementById('mobile-menu-button');
-            const sidebar = document.getElementById('sidebar');
-            const mobileOverlay = document.getElementById('mobile-menu-overlay');
-            
-            if (mobileMenuButton && sidebar && mobileOverlay) {
-                mobileMenuButton.addEventListener('click', function() {
-                    sidebar.classList.toggle('-translate-x-full');
-                    mobileOverlay.classList.toggle('hidden');
-                });
-                
-                mobileOverlay.addEventListener('click', function() {
-                    sidebar.classList.add('-translate-x-full');
-                    mobileOverlay.classList.add('hidden');
-                });
-            }
-            
-            // Auto-hide success messages after 5 seconds
-            setTimeout(() => {
-                document.querySelectorAll('.bg-green-50').forEach(el => {
-                    el.style.opacity = '0';
-                    setTimeout(() => el.remove(), 300);
-                });
-            }, 5000);
-        });
-        
+        // Auto-hide success messages after 5 seconds
+        setTimeout(() => {
+            document.querySelectorAll('.bg-green-50, .bg-red-50').forEach(el => {
+                el.style.opacity = '0';
+                setTimeout(() => el.remove(), 300);
+            });
+        }, 5000);
+
         // Common functions
         function confirmDelete(message = 'Yakin menghapus data ini?') {
             return confirm(message);
         }
-    </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+        // Optional: Fix untuk memastikan sidebar scroll bekerja dengan baik
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) {
+                sidebar.style.overflowY = 'auto';
+            }
+        });
+    </script>
+    <script>
+        function dismissAlert(el) {
+            el.classList.add('dismissing');
+            setTimeout(() => el.remove(), 300);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const DURATION = 4000; // 4 detik
+
+            document.querySelectorAll('.flash-alert').forEach(alert => {
+                const bar = alert.querySelector('.flash-progress');
+
+                // Jalankan progress bar
+                if (bar) {
+                    bar.style.transition = `width ${DURATION}ms linear`;
+                    setTimeout(() => bar.style.width = '0%', 50);
+                }
+
+                // Auto dismiss
+                setTimeout(() => dismissAlert(alert), DURATION);
+            });
+        });
+    </script>
     @stack('scripts')
 </body>
+
 </html>

@@ -120,12 +120,8 @@
             </table>
         </div>
 
-        {{-- Pagination --}}
-        @if($logs->hasPages())
-            <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/20">
-                {{ $logs->links() }}
-            </div>
-        @endif
+    @include('partials.admin.pagination', ['paginator' => $logs->withQueryString()])
+
     </div>
 </div>
 @endsection

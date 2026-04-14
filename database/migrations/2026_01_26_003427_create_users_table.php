@@ -11,23 +11,28 @@ return new class extends Migration
      */
 public function up(): void
 {
-    Schema::create('users', function (Blueprint $table) {
-        $table->id('user_id');
-        $table->string('username', 100);
-        $table->string('useremail', 100)->unique();
-        
-        // PENTING: Ubah ke minimal 100 atau 255 karakter untuk password hashed
-        $table->string('password'); 
-        
-        $table->string('no_telp', 22)->nullable();
-        $table->enum('role', ['admin', 'user'])->default('user');
-        
-        // rememberToken() otomatis membuat kolom 'remember_token' (string 100)
-        $table->rememberToken(); 
-        
-        $table->timestamps();
-    });
-}
+        Schema::create('users', function (Blueprint $table) {
+            $table->id('user_id');
+ 
+            $table->string('google_id')->nullable();
+            $table->string('username', 100);
+            $table->string('full_name')->nullable();
+            $table->string('useremail', 100)->nullable()->unique();
+            $table->string('password')->nullable(); // nullable untuk user Google
+            $table->string('no_telp', 22)->nullable();
+            $table->enum('role', ['admin', 'user'])->default('user');
+ 
+            // Member system
+            $table->boolean('is_member')->default(false);
+            $table->enum('member_tier', ['regular', 'plus', 'premium'])->default('regular');
+            $table->decimal('total_spent', 15, 2)->default(0)->comment('Total belanja kumulatif untuk hitung naik tier');
+            $table->decimal('saldo_komisi', 12, 2)->default(0);
+ 
+            $table->rememberToken();
+            $table->timestamps();
+        });
+    }
+
 
     /**
      * Reverse the migrations.

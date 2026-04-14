@@ -29,17 +29,6 @@
         </div>
     </div>
 
-    {{-- Alert --}}
-    @if(session('success'))
-        <div class="mb-6 animate-fade-in-down">
-            <div class="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl shadow-sm">
-                <div class="flex-shrink-0 w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-sm">
-                    <i class="fas fa-check text-xs"></i>
-                </div>
-                <p class="text-sm font-bold">{{ session('success') }}</p>
-            </div>
-        </div>
-    @endif
 
     {{-- Table --}}
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -146,7 +135,7 @@
                                         <div>
                                             <h4 class="text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Ukuran Default</h4>
                                             <p class="text-xs font-bold text-gray-700">
-                                                {{ $product->default_width_cm / 100 }}m x {{ $product->default_height_cm / 100 }}m
+                                                {{ $product->default_width_cm ?? 0 }}cm x {{ $product->default_height_cm ?? 0 }}cm
                                             </p>
                                         </div>
                                     </div>
@@ -178,12 +167,8 @@
             </table>
         </div>
 
-        {{-- Pagination --}}
-        @if($products->hasPages())
-            <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/20">
-                {{ $products->links() }}
-            </div>
-        @endif
+@include('partials.admin.pagination', ['paginator' => $products->withQueryString()])
+
     </div>
 </div>
 @endsection

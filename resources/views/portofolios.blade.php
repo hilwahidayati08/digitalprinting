@@ -1,588 +1,455 @@
 {{-- resources/views/frontend/portofolio/index.blade.php --}}
 @extends('admin.guest')
 
-@section('title', 'Portofolio - PrintPro')
+@section('title', 'Portofolio - CetakKilat')
 
 @section('content')
 <style>
-/* =============================================
-   HERO SECTION — Konsisten dengan Products Page
-   ============================================= */
-.hero-portfolio {
-    background: #1e3a8a;
-    padding: 5rem 0;
-    position: relative;
-    overflow: hidden;
-}
-
-.hero-portfolio::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -10%;
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
-    border-radius: 50%;
-}
-
-.hero-portfolio::after {
-    content: '';
-    position: absolute;
-    bottom: -30%;
-    left: -5%;
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
-    border-radius: 50%;
-}
-
-.hero-content {
-    position: relative;
-    z-index: 10;
-    max-width: 800px;
-    margin: 0 auto;
-    text-align: center;
-    color: white;
-}
-
-/* =============================================
-   SECTION KICKER — Konsisten
-   ============================================= */
-.section-kicker {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: #eff6ff;
-    color: #2563eb;
-    border: 1.5px solid #bfdbfe;
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: .1em;
-    padding: 5px 14px;
-    border-radius: 999px;
-    margin-bottom: 16px;
-}
-
-/* =============================================
-   PORTFOLIO SECTION — Background sama dengan Products
-   ============================================= */
-.portfolio-section {
-    background: #f8f7f4;
-    padding: 4rem 0;
-}
-
-/* =============================================
-   FILTER WRAPPER — Konsisten dengan Products
-   ============================================= */
-.filter-wrapper {
-    background: white;
-    border-radius: 2rem;
-    padding: 2rem;
-    box-shadow: 0 20px 40px -15px rgba(0,0,0,0.1);
-    border: 1px solid #ebebeb;
-    margin-bottom: 3rem;
-}
-
-.filter-input {
-    width: 100%;
-    padding: 1rem 1rem 1rem 3rem;
-    background: #f8f7f4;
-    border: 1.5px solid #ebebeb;
-    border-radius: 1rem;
-    font-size: 0.95rem;
-    transition: all 0.2s ease;
-}
-
-.filter-input:focus {
-    outline: none;
-    border-color: #2563eb;
-    background: white;
-    box-shadow: 0 0 0 4px rgba(37,99,235,0.1);
-}
-
-.filter-select {
-    appearance: none;
-    width: 100%;
-    padding: 1rem 2.5rem 1rem 1.25rem;
-    background: #f8f7f4 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") no-repeat;
-    background-position: right 1.25rem center;
-    background-size: 1.25rem;
-    border: 1.5px solid #ebebeb;
-    border-radius: 1rem;
-    font-size: 0.95rem;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    cursor: pointer;
-}
-
-.filter-select:focus {
-    outline: none;
-    border-color: #2563eb;
-    background-color: white;
-}
-
-.filter-btn {
-    width: 100%;
-    background: #2563eb;
-    color: white;
-    padding: 1rem;
-    border: none;
-    border-radius: 1rem;
-    font-weight: 700;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 14px rgba(37,99,235,.25);
-}
-
-.filter-btn:hover {
-    background: #1d4ed8;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(37,99,235,.35);
-}
-
-/* =============================================
-   PORTFOLIO CARD — Konsisten dengan prod-card
-   ============================================= */
-.porto-card {
-    background: #fff;
-    border-radius: 20px;
-    border: 1.5px solid #ebebeb;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
-    height: 100%;
-}
-
-.porto-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 20px 50px -10px rgba(0,0,0,.13);
-    border-color: #dbeafe;
-}
-
-.porto-img-wrap {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 4/3;
-    overflow: hidden;
-    background: #f1f5f9;
-    flex-shrink: 0;
-}
-
-.porto-img-wrap img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform .4s ease;
-}
-
-.porto-card:hover .porto-img-wrap img {
-    transform: scale(1.07);
-}
-
-.porto-img-wrap::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,.25) 0%, transparent 50%);
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity .3s ease;
-}
-
-.porto-card:hover .porto-img-wrap::after {
-    opacity: 1;
-}
-
-/* Badge "Project" sama dengan prod-badge */
-.porto-badge {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    z-index: 5;
-    background: rgba(37,99,235,.92);
-    color: #fff;
-    font-size: 10px;
-    font-weight: 800;
-    padding: 4px 10px;
-    border-radius: 999px;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    backdrop-filter: blur(4px);
-    box-shadow: 0 2px 8px rgba(37,99,235,.3);
-}
-
-/* Overlay "quick view" saat hover — tambahan eksklusif porto */
-.porto-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(30, 58, 138, 0.55);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity .3s ease;
-    z-index: 6;
-}
-
-.porto-card:hover .porto-overlay {
-    opacity: 1;
-}
-
-.porto-overlay-btn {
-    background: white;
-    color: #1d4ed8;
-    border: none;
-    border-radius: 999px;
-    padding: 10px 22px;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: .04em;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transform: translateY(10px);
-    transition: transform .3s ease;
-    text-decoration: none;
-    box-shadow: 0 8px 24px rgba(0,0,0,.15);
-}
-
-.porto-card:hover .porto-overlay-btn {
-    transform: translateY(0);
-}
-
-/* Body card */
-.porto-body {
-    padding: 16px 18px 18px;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-}
-
-.porto-date {
-    font-size: 10px;
-    color: #94a3b8;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-    margin-bottom: 6px;
-}
-
-.porto-title {
-    font-size: 14px;
-    font-weight: 800;
-    color: #111;
-    line-height: 1.35;
-    margin-bottom: 6px;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    min-height: 2.4rem;
-}
-
-.porto-desc {
-    font-size: 12px;
-    color: #64748b;
-    line-height: 1.6;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    min-height: 2rem;
-    margin-bottom: 14px;
-    flex: 1;
-}
-
-.porto-meta {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding-top: 10px;
-    border-top: 1px solid #f1f5f9;
-    margin-bottom: 12px;
-}
-
-.porto-read {
-    font-size: 10px;
-    font-weight: 700;
-    color: #2563eb;
-    font-style: italic;
-}
-
-/* CTA button — sama persis dengan prod-btn */
-.porto-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    width: 100%;
-    padding: 11px 0;
-    background: #2563eb;
-    color: #fff;
-    border: none;
-    border-radius: 14px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: .02em;
-    text-decoration: none;
-    transition: background .2s, transform .18s, box-shadow .2s;
-    box-shadow: 0 4px 14px rgba(37,99,235,.25);
-}
-
-.porto-btn:hover {
-    background: #1d4ed8;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(37,99,235,.35);
-    color: #fff;
-}
-
-/* =============================================
-   CARD ANIMATION — Konsisten dengan Products
-   ============================================= */
-.porto-card-wrap {
-    opacity: 0;
-    transform: translateY(24px);
-    animation: cardUp .5s ease forwards;
-}
-
-@keyframes cardUp {
-    to {
-        opacity: 1;
-        transform: translateY(0);
+    /* Reset & Base */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
     }
-}
 
-.porto-card-wrap:nth-child(1){animation-delay:.05s}
-.porto-card-wrap:nth-child(2){animation-delay:.10s}
-.porto-card-wrap:nth-child(3){animation-delay:.15s}
-.porto-card-wrap:nth-child(4){animation-delay:.20s}
-.porto-card-wrap:nth-child(5){animation-delay:.25s}
-.porto-card-wrap:nth-child(6){animation-delay:.30s}
-.porto-card-wrap:nth-child(7){animation-delay:.35s}
-.porto-card-wrap:nth-child(8){animation-delay:.40s}
-.porto-card-wrap:nth-child(9){animation-delay:.45s}
-.porto-card-wrap:nth-child(10){animation-delay:.50s}
-.porto-card-wrap:nth-child(11){animation-delay:.55s}
-.porto-card-wrap:nth-child(12){animation-delay:.60s}
+    /* Transisi Halus */
+    .custom-input {
+        transition: all 0.2s ease;
+    }
+    .custom-input:focus {
+        border-color: #2563eb;
+        background-color: #fff;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        outline: none;
+    }
 
-/* =============================================
-   EMPTY STATE
-   ============================================= */
-.empty-state {
-    text-align: center;
-    padding: 4rem 2rem;
-    background: white;
-    border-radius: 20px;
-    border: 1.5px dashed #dbeafe;
-}
+    /* Portfolio Card Styling */
+    .porto-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: #fff;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid #f0f0f0;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .porto-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.1);
+        border-color: #e0e7ff;
+    }
+
+    /* Image Wrapper */
+    .porto-img-wrapper {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 4/3;
+        overflow: hidden;
+        background: #f8fafc;
+        flex-shrink: 0;
+    }
+    
+    .porto-img-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+    
+    .porto-card:hover .porto-img-wrapper img {
+        transform: scale(1.05);
+    }
+
+    /* Badge */
+    .porto-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 5;
+        background: rgba(37, 99, 235, 0.92);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 20px;
+        letter-spacing: 0.5px;
+        backdrop-filter: blur(4px);
+    }
+
+    /* Card Body */
+    .porto-body {
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+    
+    .porto-title {
+        font-size: 14px;
+        font-weight: 800;
+        color: #1e293b;
+        line-height: 1.4;
+        margin-bottom: 8px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 40px;
+    }
+    
+    .porto-desc {
+        font-size: 11px;
+        color: #64748b;
+        line-height: 1.5;
+        margin-bottom: 12px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        flex: 1;
+    }
+    
+    .porto-date {
+        font-size: 10px;
+        color: #94a3b8;
+        font-weight: 600;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .porto-read-time {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding-top: 8px;
+        border-top: 1px solid #f1f5f9;
+        margin-bottom: 12px;
+    }
+    
+    .porto-read-time span {
+        font-size: 9px;
+        font-weight: 700;
+        color: #1d4ed8;
+    }
+    
+    .porto-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        width: 100%;
+        padding: 10px 0;
+        background: #2563eb;
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    
+    .porto-button:hover {
+        background: #1d4ed8;
+        transform: translateY(-1px);
+        color: #fff;
+    }
+    
+    .porto-button svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    /* Placeholder */
+    .porto-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+        color: #cbd5e1;
+    }
+
+    /* Animation */
+    .porto-item {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeInUp 0.5s ease forwards;
+    }
+    
+    @keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .porto-item:nth-child(1) { animation-delay: 0.05s; }
+    .porto-item:nth-child(2) { animation-delay: 0.10s; }
+    .porto-item:nth-child(3) { animation-delay: 0.15s; }
+    .porto-item:nth-child(4) { animation-delay: 0.20s; }
+    .porto-item:nth-child(5) { animation-delay: 0.25s; }
+    .porto-item:nth-child(6) { animation-delay: 0.30s; }
+    .porto-item:nth-child(7) { animation-delay: 0.35s; }
+    .porto-item:nth-child(8) { animation-delay: 0.40s; }
+
+    /* Filter Bar Mobile Fix */
+    @media (max-width: 768px) {
+        .filter-bar {
+            margin: -20px 12px 0 12px;
+            padding: 16px;
+        }
+        
+        .porto-body {
+            padding: 12px;
+        }
+        
+        .porto-title {
+            font-size: 13px;
+            min-height: 36px;
+        }
+        
+        .porto-button {
+            padding: 8px 0;
+            font-size: 11px;
+        }
+    }
+
+    /* Grid Mobile Optimization */
+    @media (max-width: 480px) {
+        .grid-cols-2 {
+            gap: 12px;
+        }
+        
+        .porto-badge {
+            font-size: 8px;
+            padding: 3px 8px;
+        }
+    }
+
+    .btn-primary-gradient {
+        background: linear-gradient(135deg, #2563eb, #4f46e5);
+    }
+    
+    /* Pagination Styling */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    
+    .pagination .page-item {
+        list-style: none;
+    }
+    
+    .pagination .page-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 36px;
+        height: 36px;
+        padding: 0 10px;
+        border-radius: 10px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        color: #475569;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    
+    .pagination .page-link:hover {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
+    }
+    
+    .pagination .active .page-link {
+        background: #2563eb;
+        border-color: #2563eb;
+        color: #fff;
+    }
+    
+    @media (max-width: 640px) {
+        .pagination .page-link {
+            min-width: 32px;
+            height: 32px;
+            font-size: 12px;
+            padding: 0 8px;
+        }
+    }
 </style>
 
-{{-- Hero Section — Konsisten dengan Products Page --}}
-<section class="hero-portfolio">
-    <div class="container mx-auto px-8 lg:px-20">
-        <div class="hero-content">
-            <h1 class="text-4xl md:text-5xl font-black mb-4 tracking-tight">
-                Portofolio
-            </h1>
-            <p class="text-blue-100 text-lg max-w-2xl mx-auto font-medium">
-                Kumpulan hasil kerja terbaik kami — dari desain hingga finishing, setiap proyek mencerminkan kualitas dan dedikasi PrintPro.
-            </p>
-        </div>
+{{-- HERO SECTION --}}
+<div class="bg-gradient-to-br from-primary-600 to-secondary-600 py-10 md:py-12 relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-32 h-32 md:w-40 md:h-40 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
+    <div class="absolute bottom-0 left-0 w-20 h-20 bg-black/5 rounded-full translate-y-10 -translate-x-8"></div>
+    
+    <div class="container mx-auto px-4 max-w-6xl relative z-10">
+        <h1 class="text-white text-2xl md:text-3xl font-black tracking-tight">
+            Portofolio <span class="font-normal opacity-80">CetakKilat</span>
+        </h1>
+        <p class="text-blue-100 text-sm mt-2 max-w-lg">
+            Kumpulan hasil kerja terbaik kami — setiap proyek mencerminkan kualitas dan dedikasi CetakKilat.
+        </p>
     </div>
-</section>
+</div>
 
-{{-- Portfolio Section --}}
-<section class="portfolio-section">
-    <div class="container mx-auto px-8 lg:px-20">
-
-        {{-- Header --}}
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
-            <div class="max-w-2xl">
-                <span class="section-kicker">
-                    <i class="fas fa-images text-[10px]"></i> SEMUA PORTOFOLIO
-                </span>
-                <h2 style="font-size:2.5rem; font-weight:900; color:#0b1426; margin-bottom:16px; line-height:1.1;">
-                    Hasil Karya PrintPro
-                </h2>
-                <p style="font-size:16px; color:#64748b; line-height:1.7;">
-                    Lebih dari sekadar cetakan — setiap proyek adalah wujud kepercayaan pelanggan kami.
-                </p>
-            </div>
-
-            <div class="bg-white px-6 py-3 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3">
-                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span class="text-gray-600 font-bold text-sm">{{ $portofolios->total() }} Project Selesai</span>
-            </div>
-        </div>
-
-        {{-- Filter Section --}}
-        <div class="filter-wrapper">
+{{-- MAIN CONTENT --}}
+<div class="-mt-6 md:-mt-8 relative z-30">
+    <div class="container mx-auto px-3 md:px-4 max-w-6xl">
+        
+        {{-- FILTER BAR --}}
+        <div class="bg-white rounded-xl md:rounded-2xl shadow-xl shadow-blue-900/10 p-3 md:p-4 border border-slate-100 filter-bar">
             <form action="{{ route('portofolio.index') }}" method="GET" id="searchForm">
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-
+                <div class="space-y-3 md:space-y-0 md:grid md:grid-cols-12 gap-3">
                     {{-- Search --}}
-                    <div class="lg:col-span-6">
-                        <div class="relative">
-                            <input
-                                type="text"
-                                name="search"
-                                value="{{ request('search') }}"
-                                placeholder="Cari project..."
-                                class="filter-input">
-                            <i class="fas fa-search absolute left-4 top-4 text-gray-400"></i>
-                        </div>
+                    <div class="md:col-span-7 relative">
+                        <span class="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                        </span>
+                        <input type="text" name="search" value="{{ request('search') }}" 
+                               placeholder="Cari project atau hasil cetak..." 
+                               class="custom-input w-full pl-9 md:pl-11 pr-3 py-2.5 md:py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none">
                     </div>
 
                     {{-- Sort --}}
-                    <div class="lg:col-span-4">
-                        <select name="sort" class="filter-select">
-                            <option value="newest" {{ request('sort', 'newest') == 'newest' ? 'selected' : '' }}>
-                                Terbaru
-                            </option>
-                            <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>
-                                Terlama
-                            </option>
-                            <option value="az" {{ request('sort') == 'az' ? 'selected' : '' }}>
-                                A – Z
-                            </option>
-                            <option value="za" {{ request('sort') == 'za' ? 'selected' : '' }}>
-                                Z – A
-                            </option>
+                    <div class="md:col-span-3">
+                        <select name="sort" onchange="this.form.submit()" class="custom-input w-full px-3 py-2.5 md:py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none">
+                            <option value="newest" {{ request('sort', 'newest') == 'newest' ? 'selected' : '' }}>Terbaru</option>
+                            <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Terlama</option>
+                            <option value="az" {{ request('sort') == 'az' ? 'selected' : '' }}>Nama A - Z</option>
                         </select>
                     </div>
 
-                    {{-- Submit --}}
-                    <div class="lg:col-span-2">
-                        <button type="submit" class="filter-btn">
-                            <i class="fas fa-filter mr-1"></i> Filter
+                    {{-- Buttons --}}
+                    <div class="md:col-span-2 flex gap-2">
+                        <button type="submit" class="flex-1 btn-primary-gradient text-white font-bold py-2.5 md:py-3 rounded-xl text-sm shadow-md hover:opacity-90 transition-opacity">
+                            Filter
                         </button>
+                        @if(request()->hasAny(['search','sort']))
+                            <a href="{{ route('portofolio.index') }}" class="flex items-center justify-center px-3 bg-slate-100 text-slate-500 rounded-xl hover:bg-slate-200 transition-all">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </a>
+                        @endif
                     </div>
                 </div>
             </form>
         </div>
 
-        {{-- Portfolio Grid --}}
-        @if($portofolios->count() > 0)
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-                @foreach ($portofolios as $item)
-                    @if($item->is_active)
-                        <div class="porto-card-wrap">
-                            <div class="porto-card">
+        {{-- PORTOFOLIO GRID SECTION --}}
+        <section class="min-h-screen py-6 md:py-10 pb-16 md:pb-20">
+            {{-- Header Info --}}
+            <div class="mb-6 md:mb-8 flex justify-between items-center flex-wrap gap-2">
+                <div>
+                    <h2 class="text-lg md:text-xl font-extrabold text-slate-800">
+                        {{ request('search') ? 'Hasil Pencarian Project' : 'Semua Hasil Karya' }}
+                    </h2>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                        <p class="text-slate-500 text-xs font-medium">{{ $portofolios->total() }} Project Selesai</p>
+                    </div>
+                </div>
+            </div>
 
-                                {{-- Image --}}
-                                <div class="porto-img-wrap">
-                                    <span class="porto-badge">Project</span>
-
-                                    @if($item->photo)
-                                        <img
-                                            src="{{ asset('storage/portofolios/' . $item->photo) }}"
-                                            alt="{{ $item->title }}"
-                                            loading="lazy">
-                                    @else
-                                        <div class="w-full h-full flex items-center justify-center bg-gray-100 text-gray-300">
-                                            <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            {{-- GRID --}}
+            @if($portofolios->count() > 0)
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
+                    @foreach($portofolios as $item)
+                        @if($item->is_active)
+                            <div class="porto-item">
+                                <div class="porto-card">
+                                    <div class="porto-img-wrapper">
+                                        <span class="porto-badge">Project</span>
+                                        @if($item->photo)
+                                            <img src="{{ asset('storage/portofolios/' . $item->photo) }}" 
+                                                 alt="{{ $item->title }}"
+                                                 loading="lazy"
+                                                 onerror="this.src='{{ asset('images/placeholder.jpg') }}'">
+                                        @else
+                                            <div class="porto-placeholder">
+                                                <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                </svg>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    
+                                    <div class="porto-body">
+                                        <div class="porto-date">
+                                            <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                             </svg>
+                                            {{ $item->created_at->format('d M Y') }}
                                         </div>
-                                    @endif
-
-                                    {{-- Hover overlay --}}
-                                    <div class="porto-overlay">
-                                        <a href="{{ url('portofolio/' . $item->slug) }}" class="porto-overlay-btn">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        <h3 class="porto-title">{{ $item->title }}</h3>
+                                        <p class="porto-desc">{{ Str::limit(strip_tags($item->description), 60) }}</p>
+                                        
+                                        <div class="porto-read-time">
+                                            <svg width="10" height="10" fill="none" stroke="#1d4ed8" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                             </svg>
-                                            Lihat Project
+                                            <span>{{ ceil(str_word_count(strip_tags($item->description)) / 200) }} Menit Baca</span>
+                                        </div>
+                                        
+                                        <a href="{{ url('portofolio/' . $item->slug) }}" class="porto-button">
+                                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            </svg>
+                                            Detail Project
                                         </a>
                                     </div>
                                 </div>
-
-                                {{-- Body --}}
-                                <div class="porto-body">
-                                    <p class="porto-date">
-                                        📅 {{ $item->created_at->format('d M Y') }}
-                                    </p>
-                                    <h3 class="porto-title">{{ $item->title }}</h3>
-                                    <p class="porto-desc">{{ strip_tags($item->description) }}</p>
-
-                                    <div class="porto-meta">
-                                        <svg class="w-3 h-3 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                        </svg>
-                                        <span class="porto-read">
-                                            {{ ceil(str_word_count(strip_tags($item->description)) / 200) }} Menit Baca
-                                        </span>
-                                    </div>
-
-                                    <a href="{{ url('portofolio/' . $item->slug) }}" class="porto-btn">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                        </svg>
-                                        Detail Project
-                                    </a>
-                                </div>
-
                             </div>
-                        </div>
-                    @endif
-                @endforeach
-            </div>
+                        @endif
+                    @endforeach
+                </div>
 
-            {{-- Pagination — Konsisten --}}
-            @if($portofolios->hasPages())
-                <div class="mt-20 flex justify-center">
+                {{-- Pagination --}}
+                <div class="mt-10 md:mt-16">
                     {{ $portofolios->withQueryString()->links() }}
                 </div>
-            @endif
-
-        @else
-            <div class="empty-state">
-                <i class="fas fa-folder-open text-5xl text-blue-200 mb-4"></i>
-                <h3 class="text-xl font-bold text-gray-700 mb-2">Belum Ada Portofolio</h3>
-                <p class="text-gray-400 text-sm">
-                    @if(request('search'))
-                        Tidak ada project yang cocok dengan "<strong>{{ request('search') }}</strong>".
-                    @else
-                        Portofolio akan segera ditampilkan di sini.
-                    @endif
-                </p>
-                @if(request('search'))
-                    <a href="{{ route('portofolio.index') }}"
-                        class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition">
-                        <i class="fas fa-times-circle"></i> Reset Pencarian
+            @else
+                {{-- Empty State --}}
+                <div class="bg-white rounded-2xl md:rounded-3xl py-16 md:py-24 text-center border border-dashed border-slate-200">
+                    <div class="bg-slate-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800">Project Belum Tersedia</h3>
+                    <p class="text-slate-400 text-sm mt-1 mb-6 md:mb-8">Maaf, kami tidak menemukan hasil untuk kriteria pencarian Anda.</p>
+                    <a href="{{ route('portofolio.index') }}" class="inline-flex px-6 md:px-8 py-2.5 md:py-3 btn-primary-gradient text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-200">
+                        Reset Pencarian
                     </a>
-                @endif
-            </div>
-        @endif
-
+                </div>
+            @endif
+        </section>
     </div>
-</section>
-@endsection
+</div>
 
-@push('scripts')
 <script>
-// Auto-submit saat sort berubah
-document.querySelector('select[name="sort"]')?.addEventListener('change', function () {
-    document.getElementById('searchForm').submit();
-});
-
-// Debounce search input (500ms) — sama dengan products page
-let searchTimeout;
-document.querySelector('input[name="search"]')?.addEventListener('input', function () {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-        document.getElementById('searchForm').submit();
-    }, 500);
-});
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle broken images
+        const images = document.querySelectorAll('img');
+        images.forEach(img => {
+            img.addEventListener('error', function() {
+                this.src = '{{ asset("images/placeholder.jpg") }}';
+                this.onerror = null;
+            });
+        });
+    });
 </script>
-@endpush
+@endsection
