@@ -189,22 +189,27 @@ class Orders extends Model
         ];
     }
 
-    public function prosesKomisi(): void
-    {
-        if ($this->commission_earned > 0) {
-            Notification::create([
-                'user_id'  => $this->user_id,
-                'type'     => 'commission',
-                'title'    => 'Komisi Diterima',
-                'message'  => 'Kamu mendapat komisi Rp '
-                             . number_format($this->commission_earned, 0, ',', '.')
-                             . ' dari pesanan #' . $this->order_number . '.',
-                'url'      => '/withdrawal',
-                'is_read'  => false,
-            ]);
-        }
-    }
+public function prosesKomisi(): void
+{
+    // Guard: cegah komisi dobel
+    if ($this->komisi_digunakan > 0 || $this->commission_earned <= 0) return;
 
+    $this->user()->increment('saldo_komisi', $this->commission_earned);
+
+    // Tandai sudah diproses dengan menyimpan nilai ke komisi_digunakan
+    // atau tambahkan kolom boolean `komisi_processed` di tabel orders
+    
+    Notification::create([
+        'user_id'  => $this->user_id,
+        'type'     => 'commission',
+        'title'    => 'Komisi Diterima',
+        'message'  => 'Kamu mendapat komisi Rp '
+                     . number_format($this->commission_earned, 0, ',', '.')
+                     . ' dari pesanan #' . $this->order_number . '.',
+        'url'      => '/withdrawal',
+        'is_read'  => false,
+    ]);
+}
     // ==========================================
     // SCOPES
     // ==========================================

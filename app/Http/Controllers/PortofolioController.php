@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 
 class PortofolioController extends Controller
 {
+    
         public function index(Request $request)
     {
         $query = Portofolios::where('is_active', true);
