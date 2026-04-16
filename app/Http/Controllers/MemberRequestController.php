@@ -116,7 +116,7 @@ public function reject($id)
     
     // Fix the notification creation
     Notification::create([
-        'user_id'  => null,  // Add this - admin notification
+    'user_id' => $memberRequest->user_id,
         'type'     => 'member',
         'title'    => '❌ Member Ditolak',
         'message'  => 'Pengajuan ' . $memberRequest->user->username . ' telah ditolak.',

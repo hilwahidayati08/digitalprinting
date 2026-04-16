@@ -43,7 +43,15 @@ class HomeController extends Controller
             ->first();
         $categories = Categories::all();
         $services = Services::all();
-        $products = Products::latest()->take(8)->get();
+        $topProductIds = OrderItems::select('product_id', DB::raw('SUM(qty) as total_sold'))
+    ->groupBy('product_id')
+    ->orderByDesc('total_sold')
+    ->take(8)
+    ->pluck('product_id');
+$products = Products::whereIn('product_id', $topProductIds)
+    ->with(['images', 'ratings', 'category'])
+    ->get()
+    ->sortBy(fn($p) => array_search($p->product_id, $topProductIds->toArray()));
         $portofolios = Portofolios::latest()->limit(4)->get();
         $faqs = Faqs::where('is_active', 1)->get();
         return view('welcome', compact(
@@ -116,11 +124,10 @@ for ($i = 5; $i >= 0; $i--) {
 
 
         // ── RECENT ORDERS (EXCEPT DELIVERED & CANCEL) ─────────
-        $recentOrders = Orders::with('user')
-            ->whereNotIn('status', ['delivered', 'cancelled']) // Mengecualikan yang sudah sampai & dibatalkan
-            ->latest()
-            ->take(8)
-            ->get();
+$recentOrders = Orders::with('user')
+    ->whereNotIn('status', ['delivered', 'cancelled', 'completed']) // Add completed if needed
+    ->latest()
+    ->paginate(5);
 
         // ── TOP PRODUCTS ───────────────────────────────────
         $topProducts = OrderItems::select('product_id', DB::raw('SUM(qty) as total_sold'))

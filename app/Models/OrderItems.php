@@ -46,8 +46,5 @@ class OrderItems extends Model
         return $this->belongsTo(Products::class, 'product_id', 'product_id');
     }
 
-    public function finishing()
-    {
-        return $this->belongsTo(FinishingOption::class, 'finishing_id', 'finishing_id');
-    }
+
 }

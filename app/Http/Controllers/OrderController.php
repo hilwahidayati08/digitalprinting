@@ -28,101 +28,82 @@ class OrderController extends Controller
         ADMIN - REPORT SECTION
     ====================================================== */
 
-    public function report(Request $request)
-    {
-        if (auth()->user()->role !== 'admin')
-            abort(403);
+public function report(Request $request)
+{
+    if (auth()->user()->role !== 'admin')
+        abort(403);
 
-        $dateFrom = $request->filled('date_from')
-            ? \Carbon\Carbon::parse($request->date_from)->startOfDay()
-            : \Carbon\Carbon::now()->startOfMonth();
+    $dateFrom = $request->filled('date_from')
+        ? \Carbon\Carbon::parse($request->date_from)->startOfDay()
+        : \Carbon\Carbon::now()->startOfMonth();
 
-        $dateTo = $request->filled('date_to')
-            ? \Carbon\Carbon::parse($request->date_to)->endOfDay()
-            : \Carbon\Carbon::now()->endOfDay();
+    $dateTo = $request->filled('date_to')
+        ? \Carbon\Carbon::parse($request->date_to)->endOfDay()
+        : \Carbon\Carbon::now()->endOfDay();
 
-        $status = $request->input('status', '');
-        $search = $request->input('search', '');
+    $status = $request->input('status', '');
+    $search = $request->input('search', '');
 
-        $query = Orders::with(['user', 'items.product.category', 'items.product.images', 'items.product.unit'])
-            ->whereBetween('created_at', [$dateFrom, $dateTo]);
+    $query = Orders::with(['user', 'items.product.images', 'items.product.unit'])
+        ->whereBetween('created_at', [$dateFrom, $dateTo]);
 
-        if ($status !== '')
-            $query->where('status', $status);
+    if ($status !== '')
+        $query->where('status', $status);
 
-        if ($search !== '') {
-            $query->where(function ($q) use ($search) {
-                $q->where('order_number', 'like', "%$search%")
-                    ->orWhereHas('user', function ($uq) use ($search) {
-                        $uq->where('username', 'like', "%$search%")
-                            ->orWhere('email', 'like', "%$search%");
-                    });
-            });
-        }
-
-        $orders = $query->latest()->paginate(10)->appends($request->query());
-
-        $summaryQuery = Orders::with('items')
-            ->whereBetween('created_at', [$dateFrom, $dateTo]);
-
-        if ($status !== '')
-            $summaryQuery->where('status', $status);
-        if ($search !== '') {
-            $summaryQuery->where(function ($q) use ($search) {
-                $q->where('order_number', 'like', "%$search%")
-                    ->orWhereHas('user', function ($uq) use ($search) {
-                        $uq->where('username', 'like', "%$search%")
-                            ->orWhere('email', 'like', "%$search%");
-                    });
-            });
-        }
-
-        $allOrders = $summaryQuery->get();
-
-        $summary = [
-            'total_orders'  => $allOrders->count(),
-            'total_revenue' => $allOrders->whereIn('status', ['processing', 'shipped', 'completed'])->sum('total'),
-            'total_items'   => $allOrders->flatMap->items->sum('qty'),
-            'avg_order'     => $allOrders->count()
-                ? $allOrders->whereIn('status', ['paid', 'processing', 'shipped', 'completed'])->avg('total')
-                : 0,
-        ];
-
-        $statusBreakdown = $allOrders->groupBy('status')->map(fn($g) => [
-            'count'   => $g->count(),
-            'revenue' => $g->sum('total'),
-        ]);
-
-        $topProducts = OrderItems::with('product.category', 'product.images', 'product.unit')
-            ->whereHas('order', function ($q) use ($dateFrom, $dateTo, $status, $search) {
-                $q->whereBetween('created_at', [$dateFrom, $dateTo]);
-                if ($status !== '')
-                    $q->where('status', $status);
-                if ($search !== '') {
-                    $q->where('order_number', 'like', "%$search%")
-                        ->orWhereHas('user', function ($uq) use ($search) {
-                            $uq->where('username', 'like', "%$search%")
-                                ->orWhere('email', 'like', "%$search%");
-                        });
-                }
-            })
-            ->select('product_id', DB::raw('SUM(qty) as total_qty'), DB::raw('SUM(subtotal) as total_revenue'))
-            ->groupBy('product_id')
-            ->orderByDesc('total_qty')
-            ->limit(5)
-            ->get();
-
-        return view('orders.report', compact(
-            'orders',
-            'summary',
-            'statusBreakdown',
-            'topProducts',
-            'dateFrom',
-            'dateTo',
-            'status',
-            'search'
-        ));
+    if ($search !== '') {
+        $query->where(function ($q) use ($search) {
+            $q->where('order_number', 'like', "%$search%")
+                ->orWhereHas('user', function ($uq) use ($search) {
+                    $uq->where('username', 'like', "%$search%")
+                        ->orWhere('useremail', 'like', "%$search%");
+                });
+        });
     }
+
+    $orders = $query->latest()->paginate(5)->appends($request->query());
+
+    $summaryQuery = Orders::with('items')
+        ->whereBetween('created_at', [$dateFrom, $dateTo]);
+
+    if ($status !== '')
+        $summaryQuery->where('status', $status);
+
+    if ($search !== '') {
+        $summaryQuery->where(function ($q) use ($search) {
+            $q->where('order_number', 'like', "%$search%")
+                ->orWhereHas('user', function ($uq) use ($search) {
+                    $uq->where('username', 'like', "%$search%")
+                        ->orWhere('useremail', 'like', "%$search%");
+                });
+        });
+    }
+
+    $allOrders = $summaryQuery->get();
+
+    $summary = [
+        'total_orders'  => $allOrders->count(),
+        'total_revenue' => $allOrders->whereIn('status', ['processing', 'shipped', 'completed'])->sum('total'),
+        'total_items'   => $allOrders->flatMap->items->sum('qty'),
+        'avg_order'     => $allOrders->count()
+            ? $allOrders->whereIn('status', ['paid', 'processing', 'shipped', 'completed'])->avg('total')
+            : 0,
+    ];
+
+    $statusBreakdown = $allOrders->groupBy('status')->map(fn($g) => [
+        'count'   => $g->count(),
+        'revenue' => $g->sum('total'),
+    ]);
+
+    return view('orders.report', compact(
+        'orders',
+        'summary',
+        'statusBreakdown',
+        'dateFrom',
+        'dateTo',
+        'status',
+        'search'
+    ));
+}
 
     public function reportPdf(Request $request)
     {
@@ -142,7 +123,6 @@ class OrderController extends Controller
             'user',
             'items.product.category',
             'items.product.material.unit',
-            'items.finishing'
         ])->whereBetween('created_at', [$dateFrom, $dateTo]);
 
         if ($status !== '')
@@ -330,27 +310,40 @@ class OrderController extends Controller
         ADMIN - ORDER MANAGEMENT
     ====================================================== */
 
-    public function adminIndex(Request $request)
-    {
-        $query = Orders::with(['user', 'items.product.category', 'items.product.unit']);
+public function adminIndex(Request $request)
+{
+    $query = Orders::with(['user', 'items.product.category', 'items.product.unit']);
 
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('order_number', 'like', "%$search%")
-                    ->orWhereHas('user', function ($uq) use ($search) {
-                        $uq->where('username', 'like', "%$search%")
-                            ->orWhere('useremail', 'like', "%$search%");
-                    });
-            });
-        }
-
-        if ($request->filled('status'))
-            $query->where('status', $request->status);
-
-        $orders = $query->latest()->paginate(5);
-        return view('orders.admin_index', compact('orders'));
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->where(function ($q) use ($search) {
+            $q->where('order_number', 'like', "%$search%")
+                ->orWhereHas('user', function ($uq) use ($search) {
+                    $uq->where('username', 'like', "%$search%")
+                        ->orWhere('useremail', 'like', "%$search%");
+                });
+        });
     }
+
+    if ($request->filled('status') && $request->status !== 'all')
+            $query->where('status', $request->status);
+    
+
+    $orders = $query->orderByRaw("
+        FIELD(status, 
+            'paid', 
+            'processing', 
+            'ready_pickup', 
+            'shipped', 
+            'pending', 
+            'completed', 
+            'cancelled'
+        )
+    ")->orderBy('created_at', 'asc')   // dalam status yang sama, yang lebih lama duluan
+      ->paginate(5);
+
+    return view('orders.admin_index', compact('orders'));
+}
 
     public function updateStatus(Request $request, $id)
     {
@@ -431,7 +424,7 @@ class OrderController extends Controller
                     'type'     => 'order',
                     'title'    => 'Pesanan Siap Diambil',
                     'message'  => 'Pesanan #' . $order->order_number . ' selesai diproduksi.',
-                    'url'      => '/ordersadmin/' . $order->order_number,
+                    'url'      => '/ordersadmin',
                     'is_read'  => false,
                 ]);
 
@@ -441,7 +434,7 @@ class OrderController extends Controller
                     'title'    => 'Pesanan Siap Diambil',
                     'message'  => 'Pesanan #' . $order->order_number
                                  . ' siap diambil di toko. Bawa bukti pesanan ya!',
-                    'url'      => '/orders/' . $order->order_number,
+                    'url'      => '/orders',
                     'is_read'  => false,
                 ]);
             }

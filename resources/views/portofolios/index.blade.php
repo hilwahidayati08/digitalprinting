@@ -1,186 +1,208 @@
-@extends('layouts.app')
+@extends('admin.admin')
 
-@section('title', 'Portofolio')
-@section('page-title', 'Portofolio')
+@section('title', 'Kelola Portofolio - Admin Panel')
 
 @section('content')
+<div class="max-full">
 
-{{-- ===== HERO SECTION ===== --}}
-<div class="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-blue-600 to-blue-500 rounded-2xl mb-10 px-8 py-14 shadow-xl shadow-blue-200">
-    {{-- Decorative circles --}}
-    <div class="absolute -top-10 -right-10 w-56 h-56 rounded-full bg-white/10 blur-2xl"></div>
-    <div class="absolute bottom-0 left-0 w-40 h-40 rounded-full bg-indigo-400/20 blur-xl"></div>
-    <div class="absolute top-6 right-1/3 w-6 h-6 rounded-full bg-white/30"></div>
-    <div class="absolute bottom-8 right-1/4 w-3 h-3 rounded-full bg-yellow-300/60"></div>
-
-    <div class="relative z-10 text-center max-w-xl mx-auto">
-        <span class="inline-block px-3 py-1 rounded-full bg-white/20 text-white text-[10px] font-black uppercase tracking-widest mb-4">
-            ✦ Karya Terbaik Kami
-        </span>
-        <h1 class="text-3xl md:text-4xl font-black text-white tracking-tight leading-tight mb-3">
-            Portofolio
-        </h1>
-        <p class="text-blue-100 text-sm font-medium leading-relaxed">
-            Koleksi proyek dan karya terbaik yang telah kami selesaikan.<br>
-            Kualitas adalah prioritas utama kami.
-        </p>
-    </div>
-</div>
-
-{{-- ===== FILTER & SEARCH ===== --}}
-<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-8">
-    <form action="{{ route('portofolio.index') }}" method="GET"
-          class="flex flex-col md:flex-row gap-3 items-center justify-between">
-
-        <div class="relative w-full md:w-80">
-            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400 pointer-events-none">
-                <i class="fas fa-search text-xs"></i>
-            </span>
-            <input type="text"
-                   name="search"
-                   value="{{ request('search') }}"
-                   placeholder="Cari portofolio..."
-                   class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl
-                          focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all
-                          text-xs font-bold shadow-sm outline-none">
+    {{-- Header --}}
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Kelola Portofolio</h2>
+            <p class="text-sm text-gray-500 font-medium italic">Manajemen karya dan proyek yang telah diselesaikan</p>
         </div>
 
-        <div class="flex items-center gap-2 w-full md:w-auto">
-            <select name="sort" onchange="this.form.submit()"
-                    class="flex-1 md:w-44 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl
-                           text-[11px] font-black uppercase focus:ring-4 focus:ring-blue-500/10
-                           outline-none cursor-pointer shadow-sm">
-                <option value="newest" {{ request('sort','newest') == 'newest' ? 'selected' : '' }}>Terbaru</option>
-                <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Terlama</option>
-                <option value="az"     {{ request('sort') == 'az' ? 'selected' : '' }}>A – Z</option>
-                <option value="za"     {{ request('sort') == 'za' ? 'selected' : '' }}>Z – A</option>
-            </select>
-
-            <button type="submit"
-                    class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl
-                           text-[11px] font-black uppercase tracking-wider transition-all shadow-md shadow-blue-200 flex items-center gap-2">
-                <i class="fas fa-filter text-xs"></i> Filter
-            </button>
-
-            @if(request()->anyFilled(['search', 'sort']))
-                <a href="{{ route('portofolio.index') }}"
-                   class="px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl
-                          text-[11px] font-black uppercase transition-all shadow-sm flex items-center gap-2">
-                    <i class="fas fa-sync-alt"></i> Reset
-                </a>
-            @endif
+        <div class="flex items-center gap-3">
+            <a href="{{ route('portofolios.create') }}"
+               class="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl shadow-md shadow-primary-200 transition-all flex items-center gap-2 text-xs font-black uppercase">
+                <i class="fas fa-plus text-sm"></i>
+                <span>Tambah Portofolio</span>
+            </a>
         </div>
-    </form>
-</div>
-
-{{-- ===== GRID CARDS ===== --}}
-@if($portofolios->isEmpty())
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 py-24 text-center">
-        <i class="fas fa-image text-5xl text-gray-200 mb-4 block"></i>
-        <p class="text-gray-400 font-bold uppercase tracking-widest text-sm italic">Belum ada portofolio tersedia</p>
-    </div>
-@else
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        @foreach($portofolios as $item)
-        <a href="{{ route('portfolio.show', $item->slug) }}"
-           class="group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden
-                  hover:shadow-xl hover:shadow-blue-100 hover:-translate-y-1 transition-all duration-300 cursor-pointer block">
-
-            {{-- Thumbnail --}}
-            <div class="relative overflow-hidden aspect-video bg-gray-100">
-                @if($item->photo)
-                    <img src="{{ asset('storage/portofolios/' . $item->photo) }}"
-                         alt="{{ $item->title }}"
-                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                @else
-                    <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-                        <i class="fas fa-image text-3xl text-blue-200"></i>
-                    </div>
-                @endif
-
-                {{-- Overlay on hover --}}
-                <div class="absolute inset-0 bg-gradient-to-t from-blue-900/70 via-blue-900/20 to-transparent
-                            opacity-0 group-hover:opacity-100 transition-opacity duration-300
-                            flex items-end justify-start p-4">
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/90 rounded-lg
-                                 text-[10px] font-black uppercase text-blue-700 tracking-wider">
-                        <i class="fas fa-eye text-[9px]"></i> Lihat Detail
-                    </span>
-                </div>
-            </div>
-
-            {{-- Body --}}
-            <div class="p-5">
-                <h3 class="text-sm font-black text-gray-900 uppercase tracking-tight leading-snug mb-2
-                           group-hover:text-blue-600 transition-colors line-clamp-2">
-                    {{ $item->title }}
-                </h3>
-                <p class="text-[11px] text-gray-500 font-medium leading-relaxed line-clamp-2">
-                    {{ strip_tags($item->description) }}
-                </p>
-            </div>
-
-            {{-- Footer --}}
-            <div class="px-5 pb-4 flex items-center justify-between">
-                <span class="inline-flex items-center gap-1 px-2 py-1 bg-emerald-50 text-emerald-700
-                             rounded-lg text-[9px] font-black uppercase tracking-wider border border-emerald-100">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    Aktif
-                </span>
-                <span class="text-blue-500 group-hover:translate-x-1 transition-transform duration-200">
-                    <i class="fas fa-arrow-right text-xs"></i>
-                </span>
-            </div>
-
-        </a>
-        @endforeach
     </div>
 
-    {{-- ===== PAGINATION ===== --}}
-    @if($portofolios->hasPages())
-    <div class="mt-8 flex justify-center">
-        <div class="inline-flex items-center gap-1 bg-white border border-gray-100 rounded-2xl shadow-sm px-4 py-3">
-            {{-- Prev --}}
-            @if($portofolios->onFirstPage())
-                <span class="px-3 py-1.5 text-gray-300 text-xs font-black cursor-not-allowed rounded-lg">
-                    <i class="fas fa-chevron-left"></i>
-                </span>
-            @else
-                <a href="{{ $portofolios->previousPageUrl() }}"
-                   class="px-3 py-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 text-xs font-black rounded-lg transition-all">
-                    <i class="fas fa-chevron-left"></i>
-                </a>
-            @endif
+    {{-- Filter Card --}}
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
+        <form action="{{ route('portofolio.index') }}" method="GET"
+              class="flex flex-col md:flex-row gap-3 items-center justify-between">
 
-            {{-- Pages --}}
-            @foreach($portofolios->getUrlRange(1, $portofolios->lastPage()) as $page => $url)
-                @if($page == $portofolios->currentPage())
-                    <span class="px-3.5 py-1.5 bg-blue-600 text-white text-xs font-black rounded-lg shadow-sm shadow-blue-200">
-                        {{ $page }}
-                    </span>
-                @else
-                    <a href="{{ $url }}"
-                       class="px-3.5 py-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 text-xs font-black rounded-lg transition-all">
-                        {{ $page }}
+            <div class="relative w-full md:w-96">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400">
+                    <i class="fas fa-search text-xs"></i>
+                </span>
+                <input type="text"
+                       name="search"
+                       value="{{ request('search') }}"
+                       placeholder="Cari judul atau deskripsi portofolio..."
+                       class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl
+                              focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500
+                              transition-all text-xs font-bold shadow-sm outline-none">
+            </div>
+
+            <div class="flex flex-wrap md:flex-nowrap items-center gap-2 w-full md:w-auto">
+                <select name="sort" onchange="this.form.submit()"
+                        class="flex-1 md:w-44 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl
+                               text-[11px] font-black uppercase focus:ring-4 focus:ring-primary-500/10
+                               outline-none cursor-pointer shadow-sm">
+                    <option value="newest" {{ request('sort', 'newest') == 'newest' ? 'selected' : '' }}>Terbaru</option>
+                    <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Terlama</option>
+                    <option value="az"     {{ request('sort') == 'az' ? 'selected' : '' }}>A – Z</option>
+                    <option value="za"     {{ request('sort') == 'za' ? 'selected' : '' }}>Z – A</option>
+                </select>
+
+                <button type="submit"
+                        class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl
+                               text-[11px] font-black uppercase tracking-wider transition-all
+                               shadow-md shadow-blue-200 flex items-center gap-2">
+                    <i class="fas fa-filter text-xs"></i> Filter
+                </button>
+
+                @if(request()->anyFilled(['search', 'sort']))
+                    <a href="{{ route('portofolio.index') }}"
+                       class="px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl
+                              text-[11px] font-black uppercase transition-all shadow-sm flex items-center gap-2">
+                        <i class="fas fa-sync-alt"></i> Reset
                     </a>
                 @endif
-            @endforeach
-
-            {{-- Next --}}
-            @if($portofolios->hasMorePages())
-                <a href="{{ $portofolios->nextPageUrl() }}"
-                   class="px-3 py-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 text-xs font-black rounded-lg transition-all">
-                    <i class="fas fa-chevron-right"></i>
-                </a>
-            @else
-                <span class="px-3 py-1.5 text-gray-300 text-xs font-black cursor-not-allowed rounded-lg">
-                    <i class="fas fa-chevron-right"></i>
-                </span>
-            @endif
-        </div>
+            </div>
+        </form>
     </div>
-    @endif
 
-@endif
+    {{-- Table Container --}}
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse whitespace-nowrap">
+                <thead>
+                    <tr class="bg-gray-50/50 border-b border-gray-100">
+                        <th class="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-wider">Portofolio</th>
+                        <th class="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-wider">Deskripsi</th>
+                        <th class="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-wider text-center">Status</th>
+                        <th class="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-wider">Tanggal</th>
+                        <th class="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-wider text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    @forelse($portofolios as $item)
+                    <tr class="hover:bg-blue-50/30 transition-colors group">
 
+                        {{-- Portofolio Info --}}
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-4">
+                                <div class="relative flex-shrink-0">
+                                    @if($item->photo)
+                                        <img src="{{ asset('storage/portofolios/' . $item->photo) }}"
+                                             alt="{{ $item->title }}"
+                                             class="h-12 w-16 rounded-xl object-cover border-2 border-white shadow-sm ring-1 ring-gray-100">
+                                    @else
+                                        <div class="h-12 w-16 rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100
+                                                    flex items-center justify-center border-2 border-white shadow-sm ring-1 ring-gray-100">
+                                            <i class="fas fa-image text-blue-300 text-sm"></i>
+                                        </div>
+                                    @endif
+                                </div>
+                                <div>
+                                    <div class="text-sm font-black text-gray-900 uppercase tracking-tight max-w-[180px] truncate">
+                                        {{ $item->title }}
+                                    </div>
+                                    <div class="text-[10px] font-bold text-gray-400 italic tracking-tighter leading-none mt-0.5">
+                                        /{{ $item->slug }}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+
+                        {{-- Deskripsi --}}
+                        <td class="px-6 py-4">
+                            <p class="text-xs text-gray-500 font-medium max-w-[240px] line-clamp-2 leading-relaxed">
+                                {{ Str::limit(strip_tags($item->description), 80) }}
+                            </p>
+                        </td>
+
+                        {{-- Status --}}
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg
+                                         text-[10px] font-black uppercase tracking-wider border
+                                         bg-emerald-50 text-emerald-700 border-emerald-100">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                Aktif
+                            </span>
+                        </td>
+
+                        {{-- Tanggal --}}
+                        <td class="px-6 py-4">
+                            <div class="flex flex-col gap-0.5">
+                                <span class="text-[10px] font-black text-gray-400 uppercase tracking-tighter">Dibuat</span>
+                                <span class="text-xs font-bold text-gray-700">
+                                    {{ $item->created_at->format('d M Y') }}
+                                </span>
+                            </div>
+                        </td>
+
+                        {{-- Aksi --}}
+                        <td class="px-6 py-4">
+                            <div class="flex items-center justify-end gap-1">
+                                <a href="{{ route('portfolio.show', $item->slug) }}"
+                                   target="_blank"
+                                   class="p-2.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all"
+                                   title="Lihat">
+                                    <i class="fas fa-eye text-sm"></i>
+                                </a>
+                                <a href="{{ route('portofolios.edit', $item->portofolio_id) }}"
+                                   class="p-2.5 text-gray-400 hover:text-amber-500 hover:bg-amber-50 rounded-xl transition-all"
+                                   title="Edit">
+                                    <i class="fas fa-pencil-alt text-sm"></i>
+                                </a>
+                                <button type="button" onclick="confirmDelete('{{ $item->portofolio_id }}')"
+                                        class="p-2.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                                        title="Hapus">
+                                    <i class="fas fa-trash-alt text-sm"></i>
+                                </button>
+                                <form id="delete-form-{{ $item->portofolio_id }}"
+                                      action="{{ route('portofolios.destroy', $item->portofolio_id) }}"
+                                      method="POST" class="hidden">
+                                    @csrf
+                                    @method('DELETE')
+                                </form>
+                            </div>
+                        </td>
+
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="px-6 py-20 text-center text-gray-400 italic font-bold uppercase tracking-widest">
+                            <i class="fas fa-image text-3xl mb-3 block opacity-20"></i>
+                            Tidak ada data portofolio ditemukan
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        @include('partials.admin.pagination', ['paginator' => $portofolios->withQueryString()])
+    </div>
+</div>
+
+<script>
+function confirmDelete(id) {
+    Swal.fire({
+        title: 'Hapus Portofolio?',
+        text: "Data permanen akan hilang dan tidak bisa dipulihkan!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e11d48',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'YA, HAPUS!',
+        cancelButtonText: 'BATAL',
+        customClass: {
+            confirmButton: 'font-black tracking-widest uppercase text-xs',
+            cancelButton: 'font-black tracking-widest uppercase text-xs'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('delete-form-' + id).submit();
+        }
+    });
+}
+</script>
 @endsection

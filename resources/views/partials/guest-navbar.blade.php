@@ -8,8 +8,8 @@
                 <a href="{{ route('home') }}" class="flex items-center group">
                     <div class="relative">
                         <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 overflow-hidden bg-slate-100 shadow-[0_0_15px_rgba(37,99,235,0.5)] border border-white/20">
-                            <img src="{{ asset('storage/logo-cetakkilat2.png') }}" 
-                                 alt="CetakKilat Logo" 
+                            <img src="{{ asset('storage/logo-cetakkilat2.png') }}"
+                                 alt="CetakKilat Logo"
                                  class="w-full h-full object-contain p-1.5"
                                  onerror="this.src='https://placehold.co/40x40?text=CK'">
                         </div>
@@ -42,81 +42,106 @@
 
             <!-- Right Side Icons -->
             <div class="flex items-center space-x-3">
-                <a href="{{ route('cart.index') }}" class="p-2.5 text-neutral-500 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-all relative group">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                    </svg>
-                    @php
-                        $cartCount = session()->has('cart') ? count(session('cart')) : 0;
-                    @endphp
-                    @if($cartCount > 0)
-                        <span class="absolute -top-1 -right-1 w-5 h-5 bg-primary-600 rounded-full text-[10px] flex items-center justify-center text-white font-black shadow-md">
-                            {{ $cartCount > 99 ? '99+' : $cartCount }}
-                        </span>
-                    @endif
-                </a>
+
+                {{-- Keranjang: tampil untuk semua user --}}
+                @guest
+                    <a href="{{ route('login') }}" class="p-2.5 text-neutral-500 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-all relative inline-flex items-center justify-center">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                    </a>
+                @endguest
+
+                @auth
+                    <a href="{{ route('cart.index') }}" class="p-2.5 text-neutral-500 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-all relative group">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+
+                        @php
+                            $cartCount = \App\Models\CartItems::whereHas('cart', function($query) {
+                                $query->where('user_id', auth()->id());
+                            })->count();
+                        @endphp
+
+                        @if($cartCount > 0)
+                            <span class="absolute -top-1 -right-1 w-5 h-5 bg-primary-600 rounded-full text-[10px] flex items-center justify-center text-white font-black shadow-md">
+                                {{ $cartCount > 99 ? '99+' : $cartCount }}
+                            </span>
+                        @endif
+                    </a>
+                @endauth
 
                 <div class="w-[1px] h-6 bg-neutral-200 mx-2"></div>
-<div class="relative">
-    <button id="userNotifBtn" class="relative p-2.5 text-neutral-500 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-all">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-        </svg>
-        @php
-            $userUnreadNotif = \App\Models\Notification::where('user_id', auth()->id())
-                                ->where('is_read', false)
-                                ->count();
-        @endphp
-        @if($userUnreadNotif > 0)
-            <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 border-2 border-white rounded-full text-[10px] flex items-center justify-center text-white font-bold">
-                {{ $userUnreadNotif > 9 ? '9+' : $userUnreadNotif }}
-            </span>
-        @endif
-    </button>
-    
-    <div id="userNotifPanel" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-neutral-100 z-50 overflow-hidden">
-        <div class="px-4 py-3 bg-gradient-to-r from-primary-50 to-white border-b border-primary-100">
-            <h3 class="text-xs font-bold text-neutral-800">
-                <i class="fas fa-bell mr-2 text-primary-500"></i>Notifikasi Pesanan
-            </h3>
-        </div>
-        <div class="max-h-96 overflow-y-auto">
-            @php
-                $userNotifs = \App\Models\Notification::where('user_id', auth()->id())
-                            ->latest()
-                            ->take(10)
-                            ->get();
-            @endphp
-            
-            @forelse($userNotifs as $notif)
-<a href="{{ $notif->url ? url($notif->url) : '#' }}" 
-   class="flex items-start gap-3 px-4 py-3 hover:bg-neutral-50 transition border-b border-neutral-50">
-                    <div class="w-8 h-8 rounded-lg {{ $notif->type == 'status' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600' }} flex items-center justify-center">
-                        <i class="fas {{ $notif->type == 'status' ? 'fa-check-circle' : 'fa-truck' }} text-xs"></i>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-xs font-bold text-neutral-800">{{ $notif->title }}</p>
-                        <p class="text-[11px] text-neutral-500 mt-0.5">{{ $notif->message }}</p>
-                        <p class="text-[10px] text-neutral-400 mt-1">{{ $notif->created_at->diffForHumans() }}</p>
-                    </div>
-                    @if(!$notif->is_read)
-                        <div class="w-1.5 h-1.5 bg-primary-500 rounded-full"></div>
-                    @endif
-                </a>
-            @empty
-                <div class="text-center py-8">
-                    <i class="fas fa-bell-slash text-3xl text-neutral-300 mb-2"></i>
-                    <p class="text-xs text-neutral-400">Tidak ada notifikasi</p>
+
+                {{-- Bell: tampil untuk semua user --}}
+                <div class="relative">
+                    @guest
+                        <a href="{{ route('login') }}" class="p-2.5 text-neutral-500 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-all inline-flex items-center justify-center">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                        </a>
+                    @endguest
+
+                    @auth
+                        <button id="userNotifBtn" class="relative p-2.5 text-neutral-500 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-all">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                            @php
+                                $userUnreadNotif = \App\Models\Notification::where('user_id', auth()->id())
+                                                    ->where('is_read', false)->count();
+                            @endphp
+                            @if($userUnreadNotif > 0)
+                                <span id="notifBadge" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 border-2 border-white rounded-full text-[10px] flex items-center justify-center text-white font-bold">
+                                    {{ $userUnreadNotif > 9 ? '9+' : $userUnreadNotif }}
+                                </span>
+                            @endif
+                        </button>
+
+                        <div id="userNotifPanel" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-neutral-100 z-50 overflow-hidden">
+                            <div class="px-4 py-3 bg-gradient-to-r from-primary-50 to-white border-b border-primary-100">
+                                <h3 class="text-xs font-bold text-neutral-800">
+                                    <i class="fas fa-bell mr-2 text-primary-500"></i>Notifikasi Pesanan
+                                </h3>
+                            </div>
+                            <div id="notifListContainer" class="max-h-96 overflow-y-auto">
+                                @php
+                                    // {{-- PERUBAHAN 1: hanya ambil notifikasi yang belum dibaca --}}
+                                    $userNotifs = \App\Models\Notification::where('user_id', auth()->id())
+                                                ->where('is_read', false)
+                                                ->latest()->take(10)->get();
+                                @endphp
+                                @forelse($userNotifs as $notif)
+                                    <a href="{{ $notif->url ? url($notif->url) : '#' }}"
+                                       class="notif-item flex items-start gap-3 px-4 py-3 hover:bg-neutral-50 transition border-b border-neutral-50">
+                                        <div class="w-8 h-8 rounded-lg {{ $notif->type == 'status' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600' }} flex items-center justify-center shrink-0">
+                                            <i class="fas {{ $notif->type == 'status' ? 'fa-check-circle' : 'fa-truck' }} text-xs"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="text-xs font-bold text-neutral-800">{{ $notif->title }}</p>
+                                            <p class="text-[11px] text-neutral-500 mt-0.5">{{ $notif->message }}</p>
+                                            <p class="text-[10px] text-neutral-400 mt-1">{{ $notif->created_at->diffForHumans() }}</p>
+                                        </div>
+                                        <div class="notif-unread-dot w-1.5 h-1.5 bg-primary-500 rounded-full shrink-0 mt-1"></div>
+                                    </a>
+                                @empty
+                                    <div id="notifEmptyState" class="text-center py-8">
+                                        <i class="fas fa-bell-slash text-3xl text-neutral-300 mb-2"></i>
+                                        <p class="text-xs text-neutral-400">Tidak ada notifikasi</p>
+                                    </div>
+                                @endforelse
+                            </div>
+                            <div class="p-2 border-t border-neutral-100 bg-neutral-50">
+                                <a href="{{ route('orders.index') }}" class="block text-center text-xs font-bold text-primary-600 py-2">
+                                    Lihat Semua Pesanan →
+                                </a>
+                            </div>
+                        </div>
+                    @endauth
                 </div>
-            @endforelse
-        </div>
-        <div class="p-2 border-t border-neutral-100 bg-neutral-50">
-            <a href="{{ route('orders.index') }}" class="block text-center text-xs font-bold text-primary-600 py-2">
-                Lihat Semua Pesanan →
-            </a>
-        </div>
-    </div>
-</div>
+
                 @auth
                     <div class="relative">
                         <button id="userDropdownBtn" class="p-1 rounded-full border-2 border-transparent hover:border-primary-100 transition-all group flex items-center gap-2">
@@ -190,7 +215,7 @@
             <a href="{{ route('contact') }}" class="block px-4 py-3 text-base font-bold rounded-xl text-neutral-600 hover:bg-neutral-50">
                 Kontak
             </a>
-            
+
             @guest
                 <div class="pt-4 mt-2 border-t border-neutral-100 space-y-2">
                     <a href="{{ route('login') }}" class="block px-4 py-3 text-center text-base font-bold text-neutral-600 hover:bg-neutral-50 rounded-xl">
@@ -224,16 +249,17 @@
 </nav>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Mobile Menu Toggle
-    const mobileBtn = document.getElementById('mobileMenuBtn');
+document.addEventListener('DOMContentLoaded', function () {
+
+    // ── Mobile Menu Toggle ──────────────────────────────────────────
+    const mobileBtn  = document.getElementById('mobileMenuBtn');
     const mobileMenu = document.getElementById('mobileMenu');
-    
+
     if (mobileBtn && mobileMenu) {
-        mobileBtn.addEventListener('click', function() {
+        mobileBtn.addEventListener('click', function () {
             const isExpanded = mobileBtn.getAttribute('aria-expanded') === 'true';
             mobileBtn.setAttribute('aria-expanded', !isExpanded);
-            
+
             if (mobileMenu.classList.contains('hidden')) {
                 mobileMenu.classList.remove('hidden');
                 document.body.style.overflow = 'hidden';
@@ -244,7 +270,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 mobileBtn.querySelector('svg').innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />`;
             }
         });
-        
+
         mobileMenu.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
                 mobileMenu.classList.add('hidden');
@@ -254,17 +280,17 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
-    
-    // User Dropdown
-    const userBtn = document.getElementById('userDropdownBtn');
-    const userMenu = document.getElementById('userDropdownMenu');
+
+    // ── User Dropdown ───────────────────────────────────────────────
+    const userBtn     = document.getElementById('userDropdownBtn');
+    const userMenu    = document.getElementById('userDropdownMenu');
     const userChevron = document.getElementById('userChevron');
-    
+
     if (userBtn && userMenu) {
         userBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             const isHidden = userMenu.classList.contains('hidden');
-            
+
             if (isHidden) {
                 userMenu.classList.remove('hidden');
                 if (userChevron) userChevron.classList.add('rotate-180');
@@ -273,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (userChevron) userChevron.classList.remove('rotate-180');
             }
         });
-        
+
         document.addEventListener('click', (e) => {
             if (!userBtn.contains(e.target) && !userMenu.contains(e.target)) {
                 userMenu.classList.add('hidden');
@@ -281,25 +307,52 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-});
-</script>
-<script>
-// User Notification Dropdown
-const userNotifBtn = document.getElementById('userNotifBtn');
+
+// ── Notifikasi Bell ─────────────────────────────────────────────
+const userNotifBtn   = document.getElementById('userNotifBtn');
 const userNotifPanel = document.getElementById('userNotifPanel');
 
 if (userNotifBtn && userNotifPanel) {
     userNotifBtn.addEventListener('click', (e) => {
         e.stopPropagation();
+        const isHidden = userNotifPanel.classList.contains('hidden');
         userNotifPanel.classList.toggle('hidden');
+
+        // Hanya tembak API jika panel baru saja dibuka
+        if (isHidden) {
+            fetch('{{ route("notifications.readAll") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // 1. Hapus badge angka merah
+                    const badge = document.getElementById('notifBadge');
+                    if (badge) badge.remove();
+
+                    // 2. Hapus titik biru (indikator unread) di setiap item, 
+                    // tapi JANGAN hapus itemnya.
+                    const unreadDots = document.querySelectorAll('.notif-unread-dot');
+                    unreadDots.forEach(dot => dot.remove());
+                }
+            })
+            .catch(err => console.error('Gagal mark notif:', err));
+        }
     });
-    
+
     document.addEventListener('click', (e) => {
         if (!userNotifBtn.contains(e.target) && !userNotifPanel.contains(e.target)) {
             userNotifPanel.classList.add('hidden');
         }
     });
 }
+
+});
 </script>
 
 <style>

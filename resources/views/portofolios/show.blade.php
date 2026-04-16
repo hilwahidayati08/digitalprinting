@@ -67,9 +67,11 @@
                             <h3 class="text-2xl font-bold mb-2">Tertarik dengan project ini?</h3>
                             <p class="text-neutral-400">Dapatkan penawaran harga terbaik untuk instansi Anda.</p>
                         </div>
-                        <a href="#" class="relative z-10 px-8 py-4 bg-primary-600 text-white font-bold rounded-2xl hover:bg-primary-700 transition-all shadow-lg shadow-primary-600/20 active:scale-95">
-                            Hubungi Tim Kami
-                        </a>
+                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $settings->whatsapp) }}?text={{ urlencode('Halo Tim Kami, saya tertarik dengan project ' . $portfolio->title . '. Berikut link detail projectnya: ' . url()->current()) }}" 
+                            target="_blank" 
+                            class="relative z-10 px-8 py-4 bg-primary-600 text-white font-bold rounded-2xl hover:bg-primary-700 transition-all shadow-lg shadow-primary-600/20 active:scale-95">
+                                Hubungi Tim Kami
+                            </a>
                         <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-primary-600/10 rounded-full blur-3xl"></div>
                     </div>
                 </div>

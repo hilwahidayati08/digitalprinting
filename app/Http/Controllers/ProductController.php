@@ -63,7 +63,7 @@ class ProductController extends Controller
             default:           $query->latest();                         break;
         }
 
-        $products   = $query->paginate(8)->withQueryString();
+        $products   = $query->get();
         $categories = Categories::orderBy('category_name')->get();
 
         return view('products', compact('products', 'categories'));

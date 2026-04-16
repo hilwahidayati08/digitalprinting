@@ -22,13 +22,6 @@
 @section('content')
 <div class="space-y-6">
 
-    @if(session('success'))
-    <div class="flex items-center gap-3 bg-green-50 border border-green-200 text-green-700 px-5 py-4 rounded-2xl text-sm font-medium">
-        <i class="fas fa-check-circle text-green-500"></i>
-        {{ session('success') }}
-    </div>
-    @endif
-
     <form action="{{ route('settings.update') }}" method="POST">
         @csrf
         @method('PUT')

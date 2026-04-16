@@ -258,11 +258,14 @@
         </div>
     </div>
 
-    {{-- Map Section --}}
+    {{-- Map Section: URL dinamis dari $settings->address --}}
+    @php
+        $mapAddress = urlencode($settings->address ?? 'Jl. Gandaria V No.11E, Jagakarsa, Jakarta Selatan');
+    @endphp
     <div class="map-container w-full h-[250px] md:h-[400px] grayscale hover:grayscale-0 transition-all duration-700 border-t border-slate-200">
         <iframe 
             class="w-full h-full"
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3965.82343274384!2d106.8184852!3d-6.3314545!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69ee2f3c3a9d9d%3A0xc3f3a6a9b4070a25!2sJl.%20Gandaria%20V%20No.11E%2C%20Jagakarsa%2C%20Jakarta%20Selatan!5e0!3m2!1sid!2sid!4v1700000000000" 
+            src="https://maps.google.com/maps?q={{ $mapAddress }}&output=embed"
             allowfullscreen="" 
             loading="lazy">
         </iframe>
@@ -278,12 +281,17 @@ function sendToWhatsApp() {
         phoneNumber = '62' + phoneNumber.substring(1);
     }
 
-    const name = document.getElementById('wa_name').value;
-    const company = document.getElementById('wa_company').value;
-    const subject = document.getElementById('wa_subject').value;
-    const message = document.getElementById('wa_message').value;
+    const nameEl    = document.getElementById('wa_name');
+    const companyEl = document.getElementById('wa_company');
+    const subjectEl = document.getElementById('wa_subject');
+    const messageEl = document.getElementById('wa_message');
 
-    if(!name || !message) {
+    const name    = nameEl.value.trim();
+    const company = companyEl.value.trim();
+    const subject = subjectEl.value.trim();
+    const message = messageEl.value.trim();
+
+    if (!name || !message) {
         alert("⚠️ Nama dan Pesan wajib diisi ya!");
         return;
     }
@@ -296,6 +304,12 @@ function sendToWhatsApp() {
                  `*Pesan:* ${message}`;
 
     window.open(`https://api.whatsapp.com/send?phone=${phoneNumber}&text=${text}`, '_blank');
+
+    // Reset form setelah pesan terkirim
+    nameEl.value    = '';
+    companyEl.value = '';
+    subjectEl.value = '';
+    messageEl.value = '';
 }
 </script>
 @endsection

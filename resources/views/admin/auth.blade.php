@@ -134,6 +134,7 @@
     </style>
 </head>
 <body>
+
     <div class="auth-wrapper">
         <div class="auth-card">
             @yield('content')

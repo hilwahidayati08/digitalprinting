@@ -150,8 +150,8 @@
                     </div>
 
                     {{-- Form --}}
-                    <form id="addToCartForm" method="POST" action="{{ route('cart.add') }}" class="space-y-6">
-                        @csrf
+<form id="addToCartForm" method="POST" action="{{ route('cart.add') }}" class="space-y-6">
+    @csrf
                         <input type="hidden" name="product_id" value="{{ $product->product_id }}">
                         <input type="hidden" name="buy_now" id="buy_now_flag" value="0">
                         <input type="hidden" name="used_material_qty" id="used_material_qty" value="">
@@ -508,6 +508,25 @@ document.addEventListener('DOMContentLoaded', function () {
             setButtonsDisabled(false);
         }
     }
+function validateSize() {
+    const needsSize = calcType === 'luas' || calcType === 'stiker';
+    if (!needsSize) return true;
+
+    const w = parseFloat(widthInput?.value) || 0;
+    const h = parseFloat(heightInput?.value) || 0;
+
+    if (w <= 0 || h <= 0) {
+        widthInput?.classList.add('border-red-500');
+        heightInput?.classList.add('border-red-500');
+        widthInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        widthInput?.focus();
+        return false;
+    }
+
+    widthInput?.classList.remove('border-red-500');
+    heightInput?.classList.remove('border-red-500');
+    return true;
+}
 
     function calculate() {
         let w = widthInput  ? (parseFloat(widthInput.value)  || parseFloat(product.default_width_cm)  || 0) : (parseFloat(product.default_width_cm)  || 0);
@@ -657,15 +676,31 @@ document.addEventListener('DOMContentLoaded', function () {
         };
     }
 
-    if (buyNowBtn) {
-        buyNowBtn.onclick = function(e) {
-            e.preventDefault();
-            if (buyNowBtn.disabled) return;
-            const f = document.getElementById('buy_now_flag');
-            if (f) f.value = "1";
-            document.getElementById('addToCartForm')?.submit();
-        };
-    }
+if (buyNowBtn) {
+    buyNowBtn.onclick = function(e) {
+        e.preventDefault();
+        if (buyNowBtn.disabled) return;
+        if (!validateSize()) return;
+        
+        // Set flag buy_now = 1
+        const buyNowFlag = document.getElementById('buy_now_flag');
+        if (buyNowFlag) buyNowFlag.value = "1";
+        
+        // Ubah action form ke route khusus checkout langsung
+        const form = document.getElementById('addToCartForm');
+        const originalAction = form.action;
+        form.action = "{{ route('cart.buyNow') }}"; // ← route baru yang akan kita buat
+        
+        // Submit form
+        form.submit();
+        
+        // Kembalikan action asli (opsional, untuk下次 submit)
+        setTimeout(() => { form.action = originalAction; }, 100);
+    };
+}
+document.getElementById('addToCartForm')?.addEventListener('submit', function(e) {
+    if (!validateSize()) e.preventDefault();
+});
 
     calculate();
 });

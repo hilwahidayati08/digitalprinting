@@ -178,7 +178,7 @@ Notification::create([
     'message'  => 'Pesanan #' . $order->order_number
                  . ' dari ' . $user->username
                  . ' menunggu pembayaran.',
-    'url'      => '/ordersadmin/' . $order->order_number,
+'url' => '/ordersadmin',
     'is_read'  => false,
 ]);
 

@@ -1,321 +1,279 @@
-@extends('layouts.app')
+@extends('admin.admin')
 
-@section('title', 'Edit Portofolio')
-@section('page-title', 'Edit Portofolio')
+@section('title', 'Edit Portofolio - Admin Panel')
 
 @section('content')
+<div class="max-full mx-auto px-4 py-8">
 
-<div class="max-w-full">
-
-    {{-- ===== HEADER ===== --}}
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+    {{-- Header --}}
+    <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-            <h2 class="text-2xl font-black text-gray-900 tracking-tight">Edit Portofolio</h2>
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Edit Portofolio</h1>
             <p class="text-sm text-gray-500 font-medium italic">Perbarui informasi portofolio yang sudah ada</p>
         </div>
-        <a href="{{ route('portofolios.index') }}"
-           class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700
-                  rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-sm">
-            <i class="fas fa-arrow-left text-sm"></i> Kembali
-        </a>
+        <div class="flex items-center gap-3">
+            <span class="px-4 py-2 bg-gray-100 rounded-2xl text-xs font-bold text-gray-600 uppercase tracking-widest">
+                ID: #{{ $portofolio->portofolio_id }}
+            </span>
+            <a href="{{ route('portofolio.index') }}"
+               class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700
+                      rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-sm">
+                <i class="fas fa-arrow-left text-sm"></i> Kembali
+            </a>
+        </div>
     </div>
 
-    {{-- ===== ERROR ALERT ===== --}}
+    {{-- Error Alert --}}
     @if($errors->any())
-    <div class="mb-6 flex items-start gap-3 p-4 bg-rose-50 border border-rose-200 rounded-2xl text-rose-700">
-        <i class="fas fa-exclamation-circle mt-0.5 text-rose-500"></i>
-        <ul class="text-xs font-bold space-y-1">
+    <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-xl shadow-sm">
+        <p class="font-bold mb-1 italic text-sm">Ada kesalahan input:</p>
+        <ul class="text-xs list-disc list-inside space-y-1">
             @foreach($errors->all() as $error)
-                <li>• {{ $error }}</li>
+                <li>{{ $error }}</li>
             @endforeach
         </ul>
     </div>
     @endif
 
-    {{-- ===== FORM CARD ===== --}}
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <form action="{{ route('portofolios.update', $portofolio->portofolio_id) }}"
+          method="POST" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
 
-        {{-- Card top accent --}}
-        <div class="h-1.5 bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500"></div>
+        <div class="grid grid-cols-12 gap-8">
 
-        <div class="p-6 md:p-8">
-            <form action="{{ route('portofolios.update', $portofolio->portofolio_id) }}"
-                  method="POST"
-                  enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
+            {{-- KOLOM KIRI --}}
+            <div class="col-span-12 lg:col-span-8 space-y-6">
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-
-                    {{-- ===== LEFT COL ===== --}}
-                    <div class="space-y-6">
-
-                        {{-- Title --}}
-                        <div>
-                            <label class="block text-[11px] font-black text-gray-500 uppercase tracking-widest mb-2">
-                                Judul Portofolio <span class="text-rose-500">*</span>
-                            </label>
-                            <input type="text"
-                                   name="title"
-                                   value="{{ old('title', $portofolio->title) }}"
-                                   placeholder="Contoh: Desain Packaging Premium..."
-                                   class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl
-                                          text-sm font-bold text-gray-800 placeholder:font-normal placeholder:text-gray-400
-                                          focus:ring-4 focus:ring-amber-400/20 focus:border-amber-400 outline-none transition-all"
-                                   required>
+                {{-- Info Portofolio --}}
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 space-y-6">
+                    <div class="flex items-center gap-3 border-b border-gray-50 pb-4">
+                        <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600">
+                            <i class="fas fa-layer-group"></i>
                         </div>
+                        <h3 class="text-lg font-bold text-gray-900">Informasi Portofolio</h3>
+                    </div>
 
-                        {{-- Description --}}
-                        <div>
-                            <label class="block text-[11px] font-black text-gray-500 uppercase tracking-widest mb-2">
-                                Deskripsi <span class="text-rose-500">*</span>
-                            </label>
-                            <textarea name="description"
-                                      rows="6"
-                                      placeholder="Deskripsikan proyek ini secara singkat dan menarik..."
-                                      class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl
-                                             text-sm font-medium text-gray-800 placeholder:font-normal placeholder:text-gray-400
-                                             focus:ring-4 focus:ring-amber-400/20 focus:border-amber-400 outline-none transition-all resize-none"
-                                      required>{{ old('description', $portofolio->description) }}</textarea>
+                    {{-- Judul --}}
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">
+                            Judul Portofolio <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text"
+                               name="title"
+                               value="{{ old('title', $portofolio->title) }}"
+                               placeholder="Contoh: Desain Packaging Premium..."
+                               required
+                               class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl
+                                      text-sm font-bold text-gray-800 placeholder:font-normal placeholder:text-gray-400
+                                      focus:ring-4 focus:ring-amber-400/20 focus:border-amber-400 outline-none transition-all">
+                    </div>
+
+                    {{-- Deskripsi --}}
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">
+                            Deskripsi <span class="text-red-500">*</span>
+                        </label>
+                        <textarea name="description"
+                                  rows="6"
+                                  placeholder="Deskripsikan proyek ini secara singkat dan menarik..."
+                                  required
+                                  class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl
+                                         text-sm font-medium text-gray-800 placeholder:font-normal placeholder:text-gray-400
+                                         focus:ring-4 focus:ring-amber-400/20 focus:border-amber-400 outline-none transition-all resize-none">{{ old('description', $portofolio->description) }}</textarea>
+                    </div>
+
+                    {{-- Meta Info --}}
+                    <div class="grid grid-cols-2 gap-3 pt-2">
+                        <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Slug</p>
+                            <p class="text-xs font-bold text-gray-600 truncate">{{ $portofolio->slug ?? '-' }}</p>
                         </div>
+                        <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Dibuat</p>
+                            <p class="text-xs font-bold text-gray-600">{{ $portofolio->created_at->format('d M Y') }}</p>
+                        </div>
+                    </div>
+                </div>
 
-                        {{-- Status --}}
-                        <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200 cursor-pointer"
-                             onclick="toggleStatus()"
-                             id="status-toggle">
-                            <input type="checkbox"
-                                   id="is_active_edit"
-                                   name="is_active"
-                                   value="1"
-                                   {{ $portofolio->is_active ? 'checked' : '' }}
-                                   class="w-4 h-4 accent-blue-600 cursor-pointer"
-                                   onclick="event.stopPropagation(); updateStatusBadge()">
+                {{-- Gambar --}}
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+                    <div class="flex items-center gap-3 border-b border-gray-50 pb-4 mb-6">
+                        <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900">Gambar Portofolio</h3>
+                    </div>
+
+                    {{-- Preview gambar saat ini --}}
+                    @if($portofolio->photo)
+                    <div class="mb-4">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Gambar Saat Ini</p>
+                        <div class="relative rounded-2xl overflow-hidden border border-gray-200 bg-gray-50">
+                            <img src="{{ asset('storage/portofolios/' . $portofolio->photo) }}"
+                                 alt="{{ $portofolio->title }}"
+                                 id="current-photo"
+                                 class="w-full h-48 object-cover">
+                            <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+                                <p class="text-[10px] font-black text-white/80 uppercase tracking-widest">
+                                    <i class="fas fa-image mr-1"></i> {{ $portofolio->photo }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
+                    {{-- Upload baru --}}
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">
+                        {{ $portofolio->photo ? 'Ganti Gambar' : 'Upload Gambar' }}
+                        @if(!$portofolio->photo)<span class="text-red-500">*</span>@endif
+                    </p>
+
+                    <label for="photo_edit"
+                           class="group relative flex flex-col items-center justify-center w-full h-44
+                                  border-2 border-dashed border-gray-200 rounded-2xl cursor-pointer
+                                  bg-gray-50 hover:bg-amber-50 hover:border-amber-400 transition-all duration-200">
+
+                        <img id="preview-edit" src="#" alt="preview"
+                             class="hidden w-full h-full object-cover rounded-2xl absolute inset-0">
+
+                        <div id="placeholder-edit" class="flex flex-col items-center gap-3 text-center px-6">
+                            <div class="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center
+                                        group-hover:bg-amber-200 group-hover:scale-110 transition-all duration-200">
+                                <i class="fas fa-cloud-upload-alt text-xl text-amber-500"></i>
+                            </div>
                             <div>
-                                <p class="text-xs font-black text-gray-800 uppercase tracking-wider">Status Portofolio</p>
-                                <p class="text-[10px] text-gray-400 font-medium">Centang untuk menampilkan di halaman publik</p>
-                            </div>
-                            <span id="status-badge" class="ml-auto inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider border
-                                {{ $portofolio->is_active
-                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
-                                    : 'bg-gray-100 text-gray-500 border-gray-200' }}">
-                                <span id="status-dot" class="w-1.5 h-1.5 rounded-full {{ $portofolio->is_active ? 'bg-emerald-500' : 'bg-gray-400' }}"></span>
-                                <span id="status-text">{{ $portofolio->is_active ? 'Aktif' : 'Nonaktif' }}</span>
-                            </span>
-                        </div>
-
-                        {{-- Meta info --}}
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
-                                <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">ID Portofolio</p>
-                                <p class="text-xs font-black text-gray-700">#{{ $portofolio->portofolio_id }}</p>
-                            </div>
-                            <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
-                                <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Slug</p>
-                                <p class="text-xs font-bold text-gray-600 truncate">{{ $portofolio->slug ?? '-' }}</p>
+                                <p class="text-sm font-black text-gray-700">Klik untuk ganti gambar</p>
+                                <p class="text-[10px] text-gray-400 font-medium mt-0.5">JPG, JPEG, PNG — Maks. 2MB</p>
                             </div>
                         </div>
 
+                        <input type="file" id="photo_edit" name="photo"
+                               accept="image/jpg,image/jpeg,image/png"
+                               class="hidden"
+                               onchange="previewImage(this)">
+                    </label>
+
+                    <div id="file-info-edit" class="hidden mt-3 items-center justify-between
+                         px-3 py-2 bg-amber-50 border border-amber-100 rounded-xl">
+                        <span class="text-[10px] font-black text-amber-700 truncate" id="file-name-edit">-</span>
+                        <button type="button"
+                                onclick="clearImage()"
+                                class="text-rose-500 hover:text-rose-700 ml-2 text-xs font-black shrink-0">
+                            <i class="fas fa-times"></i> Hapus
+                        </button>
                     </div>
 
-                    {{-- ===== RIGHT COL ===== --}}
-                    <div class="space-y-6">
+                    @if($portofolio->photo)
+                    <p class="text-[10px] text-gray-400 font-medium mt-2 flex items-center gap-1">
+                        <i class="fas fa-info-circle text-blue-400"></i>
+                        Kosongkan jika tidak ingin mengganti gambar
+                    </p>
+                    @endif
+                </div>
 
-                        {{-- Current Photo --}}
-                        @if($portofolio->photo)
-                        <div>
-                            <label class="block text-[11px] font-black text-gray-500 uppercase tracking-widest mb-2">
-                                Gambar Saat Ini
-                            </label>
-                            <div class="relative rounded-2xl overflow-hidden border border-gray-200 bg-gray-50">
-                                <img src="{{ asset('storage/portofolios/' . $portofolio->photo) }}"
-                                     alt="{{ $portofolio->title }}"
-                                     id="current-photo"
-                                     class="w-full h-48 object-cover">
-                                <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-3">
-                                    <p class="text-[10px] font-black text-white/80 uppercase tracking-widest">
-                                        <i class="fas fa-image mr-1"></i> {{ $portofolio->photo }}
-                                    </p>
-                                </div>
-                            </div>
+            </div>
+
+            {{-- KOLOM KANAN --}}
+            <div class="col-span-12 lg:col-span-4 space-y-6">
+
+                {{-- Status --}}
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="fas fa-toggle-on text-emerald-500"></i> Status Portofolio
+                    </h3>
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                        <div class="flex flex-col">
+                            <span class="text-xs font-bold text-gray-700 uppercase">Tampilkan di Publik</span>
+                            <span class="text-[10px] text-gray-400">Aktifkan agar terlihat pengunjung</span>
                         </div>
-                        @endif
-
-                        {{-- New Photo Upload --}}
-                        <div>
-                            <label class="block text-[11px] font-black text-gray-500 uppercase tracking-widest mb-2">
-                                {{ $portofolio->photo ? 'Ganti Gambar' : 'Upload Gambar' }}
-                                @if(!$portofolio->photo)<span class="text-rose-500">*</span>@endif
-                            </label>
-
-                            <label for="photo_edit"
-                                   class="group relative flex flex-col items-center justify-center w-full h-44
-                                          border-2 border-dashed border-gray-200 rounded-2xl cursor-pointer
-                                          bg-gray-50 hover:bg-amber-50 hover:border-amber-400 transition-all duration-200"
-                                   id="dropzone-edit">
-
-                                <img id="preview-edit"
-                                     src="#"
-                                     alt="preview"
-                                     class="hidden w-full h-full object-cover rounded-2xl absolute inset-0">
-
-                                <div id="placeholder-edit" class="flex flex-col items-center gap-3 text-center px-6">
-                                    <div class="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center
-                                                group-hover:bg-amber-200 group-hover:scale-110 transition-all duration-200">
-                                        <i class="fas fa-cloud-upload-alt text-xl text-amber-500"></i>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-black text-gray-700">Klik untuk ganti gambar</p>
-                                        <p class="text-[10px] text-gray-400 font-medium mt-0.5">JPG, JPEG, PNG — Maks. 2MB</p>
-                                    </div>
-                                </div>
-
-                                <input type="file"
-                                       id="photo_edit"
-                                       name="photo"
-                                       accept="image/jpg,image/jpeg,image/png"
-                                       class="hidden"
-                                       onchange="previewImage(this, 'preview-edit', 'placeholder-edit', 'file-info-edit')">
-                            </label>
-
-                            <div id="file-info-edit" class="hidden mt-2 flex items-center justify-between
-                                 px-3 py-2 bg-amber-50 border border-amber-100 rounded-xl">
-                                <span class="text-[10px] font-black text-amber-700 truncate" id="file-name-edit">-</span>
-                                <button type="button" onclick="clearImage('photo_edit','preview-edit','placeholder-edit','file-info-edit')"
-                                        class="text-rose-500 hover:text-rose-700 ml-2 text-xs font-black shrink-0">
-                                    <i class="fas fa-times"></i> Hapus
-                                </button>
-                            </div>
-
-                            @if($portofolio->photo)
-                            <p class="text-[10px] text-gray-400 font-medium mt-2 flex items-center gap-1">
-                                <i class="fas fa-info-circle text-blue-400"></i>
-                                Kosongkan jika tidak ingin mengganti gambar
-                            </p>
-                            @endif
-                        </div>
-
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="hidden" name="is_active" value="0">
+                            <input type="checkbox" id="is_active_edit" name="is_active" value="1"
+                                   class="sr-only peer" {{ $portofolio->is_active ? 'checked' : '' }}>
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer
+                                        peer-checked:after:translate-x-full peer-checked:after:border-white
+                                        after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+                                        after:bg-white after:border-gray-300 after:border after:rounded-full
+                                        after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                        </label>
                     </div>
                 </div>
 
-                {{-- ===== ACTIONS ===== --}}
-                <div class="flex items-center justify-between mt-8 pt-6 border-t border-gray-100">
-                    <div class="flex items-center gap-3">
-                        <button type="submit"
-                                class="px-7 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl
-                                       text-xs font-black uppercase tracking-widest transition-all
-                                       shadow-md shadow-amber-200 flex items-center gap-2">
-                            <i class="fas fa-save"></i> Update Portofolio
-                        </button>
-                        <a href="{{ route('portofolios.index') }}"
-                           class="px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl
-                                  text-xs font-black uppercase tracking-widest transition-all">
-                            Batal
-                        </a>
-                    </div>
-
-                    {{-- Danger zone --}}
-                    <form action="{{ route('portofolios.destroy', $portofolio->portofolio_id) }}"
-                          method="POST"
-                          onsubmit="return confirmDelete(event, this)">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit"
-                                class="px-5 py-3 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-100
-                                       rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2">
-                            <i class="fas fa-trash-alt"></i> Hapus
-                        </button>
-                    </form>
+                {{-- Action Buttons --}}
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 space-y-3">
+                    <h3 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="fas fa-save text-amber-500"></i> Simpan Perubahan
+                    </h3>
+                    <button type="submit"
+                            class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl
+                                   font-black shadow-lg shadow-blue-200 transition-all transform active:scale-95
+                                   text-sm uppercase tracking-widest">
+                        <i class="fas fa-save mr-2"></i> Update Portofolio
+                    </button>
+                    <a href="{{ route('portofolios.index') }}"
+                       class="w-full block py-4 bg-white border border-gray-200 text-gray-500 rounded-2xl
+                              text-center text-sm font-bold hover:bg-gray-50 transition-all">
+                        Batal & Kembali
+                    </a>
                 </div>
 
-            </form>
+            </div>
         </div>
-    </div>
+    </form>
 </div>
 
 <script>
-function previewImage(input, previewId, placeholderId, fileInfoId) {
+function previewImage(input) {
     const file = input.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = e => {
-        const preview = document.getElementById(previewId);
-        const placeholder = document.getElementById(placeholderId);
-        const fileInfo = document.getElementById(fileInfoId);
+        const preview = document.getElementById('preview-edit');
+        const placeholder = document.getElementById('placeholder-edit');
+        const fileInfo = document.getElementById('file-info-edit');
         const fileName = document.getElementById('file-name-edit');
+        const currentPhoto = document.getElementById('current-photo');
 
         preview.src = e.target.result;
         preview.classList.remove('hidden');
         placeholder.classList.add('hidden');
         fileInfo.classList.remove('hidden');
         fileInfo.classList.add('flex');
-        if (fileName) fileName.textContent = file.name;
-
-        // Also update current photo display
-        const currentPhoto = document.getElementById('current-photo');
+        fileName.textContent = file.name;
         if (currentPhoto) currentPhoto.src = e.target.result;
     };
     reader.readAsDataURL(file);
 }
 
-function clearImage(inputId, previewId, placeholderId, fileInfoId) {
-    document.getElementById(inputId).value = '';
-    const preview = document.getElementById(previewId);
-    const placeholder = document.getElementById(placeholderId);
-    const fileInfo = document.getElementById(fileInfoId);
-
-    preview.src = '#';
-    preview.classList.add('hidden');
-    placeholder.classList.remove('hidden');
-    fileInfo.classList.add('hidden');
-    fileInfo.classList.remove('flex');
+function clearImage() {
+    document.getElementById('photo_edit').value = '';
+    document.getElementById('preview-edit').src = '#';
+    document.getElementById('preview-edit').classList.add('hidden');
+    document.getElementById('placeholder-edit').classList.remove('hidden');
+    document.getElementById('file-info-edit').classList.add('hidden');
+    document.getElementById('file-info-edit').classList.remove('flex');
 }
 
-function toggleStatus() {
-    const cb = document.getElementById('is_active_edit');
-    cb.checked = !cb.checked;
-    updateStatusBadge();
-}
-
-function updateStatusBadge() {
-    const cb = document.getElementById('is_active_edit');
-    const badge = document.getElementById('status-badge');
-    const dot = document.getElementById('status-dot');
-    const text = document.getElementById('status-text');
-
-    if (cb.checked) {
-        badge.className = 'ml-auto inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider border bg-emerald-50 text-emerald-700 border-emerald-100';
-        dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-500';
-        text.textContent = 'Aktif';
-    } else {
-        badge.className = 'ml-auto inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider border bg-gray-100 text-gray-500 border-gray-200';
-        dot.className = 'w-1.5 h-1.5 rounded-full bg-gray-400';
-        text.textContent = 'Nonaktif';
-    }
-}
-
-function confirmDelete(e, form) {
-    e.preventDefault();
-    if (typeof Swal !== 'undefined') {
-        Swal.fire({
-            title: 'Hapus Portofolio?',
-            text: "Data akan terhapus permanen dan tidak bisa dipulihkan!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#e11d48',
-            cancelButtonColor: '#64748b',
-            confirmButtonText: 'YA, HAPUS!',
-            cancelButtonText: 'BATAL',
-            customClass: {
-                confirmButton: 'font-black tracking-widest uppercase text-xs',
-                cancelButton: 'font-black tracking-widest uppercase text-xs'
-            }
-        }).then(result => { if (result.isConfirmed) form.submit(); });
-    } else {
-        if (confirm('Yakin ingin menghapus portofolio ini?')) form.submit();
-    }
-    return false;
+function confirmDelete() {
+    Swal.fire({
+        title: 'Hapus Portofolio?',
+        text: "Data akan terhapus permanen dan tidak bisa dipulihkan!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e11d48',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'YA, HAPUS!',
+        cancelButtonText: 'BATAL',
+        customClass: {
+            confirmButton: 'font-black tracking-widest uppercase text-xs',
+            cancelButton: 'font-black tracking-widest uppercase text-xs'
+        }
+    }).then(result => {
+        if (result.isConfirmed) {
+            document.getElementById('delete-porto-form').submit();
+        }
+    });
 }
 </script>
-
 @endsection

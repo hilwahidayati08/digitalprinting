@@ -72,8 +72,8 @@ class Materials extends Model
                 // Pastikan admin mendapatkan notifikasi (Sesuaikan user_id admin kamu)
                 
                 Notification::create([
-                                'type'    => 'stock',  // ← tambah ini
-
+                    'user_id'  => null,            // null = notif admin global
+                    'type'    => 'stock',  // ← tambah ini
                     'title'   => '⚠️ Stok Kritis: ' . $material->material_name,
                     'message' => "Sisa bahan tinggal {$material->stock}, sudah mencapai batas aman ({$material->min_stock}).",
                     'url'     => '/materials', // Ubah sesuai route menu material kamu

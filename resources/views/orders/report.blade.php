@@ -46,14 +46,28 @@
                 </div>
                 <div>
                     <label class="block text-[11px] font-black text-gray-400 uppercase tracking-wider mb-2">Status Order</label>
-                    <select name="status"
-                        class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-sm">
-                        <option value="">Semua Status</option>
-@foreach(['pending','processing','ready_pickup','shipped','completed','cancelled'] as $s)
-                            <option value="{{ $s }}" @selected(request('status') == $s)>{{ ucfirst(str_replace('_', ' ', $s)) }}</option>
-                        @endforeach
-                    </select>
+<select name="status"
+    class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-sm appearance-none">>
+    <option value="">Semua Status</option>
+    @php
+        $statusLabels = [
+            'pending'      => 'Menunggu Pembayaran',
+            'paid'         => 'Pembayaran Dikonfirmasi',
+            'processing'   => 'Sedang Diproses',
+            'ready_pickup' => 'Siap Diambil',
+            'shipped'      => 'Dikirim',
+            'completed'    => 'Selesai',
+            'cancelled'    => 'Dibatalkan',
+        ];
+    @endphp
+    @foreach($statusLabels as $value => $label)
+        <option value="{{ $value }}" @selected(request('status') == $value)>
+            {{ $label }}
+        </option>
+    @endforeach
+</select>
                 </div>
+
                 <div>
                     <label class="block text-[11px] font-black text-gray-400 uppercase tracking-wider mb-2">Cari Order</label>
                     <div class="relative">
@@ -105,114 +119,6 @@
         @endforeach
     </div>
 
-    {{-- Breakdown Status + Top Products --}}
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {{-- Status Breakdown --}}
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-                <h3 class="text-sm font-black text-gray-700 flex items-center gap-2">
-                    <i class="fas fa-chart-pie text-blue-500"></i>
-                    Per Status Order
-                </h3>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead>
-                        <tr class="bg-gray-50/50 border-b border-gray-100">
-                            <th class="px-6 py-3 text-[11px] font-black text-gray-400 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-[11px] font-black text-gray-400 uppercase tracking-wider text-center">Jumlah Order</th>
-                            <th class="px-6 py-3 text-[11px] font-black text-gray-400 uppercase tracking-wider text-right">Pendapatan</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-50">
-                        @foreach($statusBreakdown as $st => $data)
-                        @php
-                            $color = match($st) {
-                                'pending'    => 'bg-amber-100 text-amber-700',
-                                'paid'       => 'bg-teal-100 text-teal-700',
-                                'processing' => 'bg-blue-100 text-blue-700',
-                                'shipped'    => 'bg-purple-100 text-purple-700',
-                                'completed'  => 'bg-emerald-100 text-emerald-700',
-                                'cancelled'  => 'bg-red-100 text-red-700',
-                                default      => 'bg-gray-100 text-gray-600',
-                            };
-                        @endphp
-                        <tr class="hover:bg-gray-50/50 transition-colors">
-                            <td class="px-6 py-3">
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold {{ $color }}">
-                                    {{ strtoupper(str_replace('_', ' ', $st)) }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-3 text-center">
-                                <span class="text-sm font-bold text-gray-700">{{ $data['count'] }}</span>
-                                <span class="text-[10px] text-gray-400 ml-1">order</span>
-                            </td>
-                            <td class="px-6 py-3 text-right">
-                                <span class="text-sm font-black text-gray-800">Rp {{ number_format($data['revenue'], 0, ',', '.') }}</span>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        {{-- Top Products --}}
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-                <h3 class="text-sm font-black text-gray-700 flex items-center gap-2">
-                    <i class="fas fa-trophy text-yellow-500"></i>
-                    Top 5 Produk Terlaris
-                </h3>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead>
-                        <tr class="bg-gray-50/50 border-b border-gray-100">
-                            <th class="px-6 py-3 text-[11px] font-black text-gray-400 uppercase tracking-wider w-16">#</th>
-                            <th class="px-6 py-3 text-[11px] font-black text-gray-400 uppercase tracking-wider">Nama Produk</th>
-                            <th class="px-6 py-3 text-[11px] font-black text-gray-400 uppercase tracking-wider text-center">Terjual</th>
-                            <th class="px-6 py-3 text-[11px] font-black text-gray-400 uppercase tracking-wider text-right">Total Revenue</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-50">
-                        @forelse($topProducts as $i => $item)
-                        <tr class="hover:bg-gray-50/50 transition-colors">
-                            <td class="px-6 py-3 text-center">
-                                @if($i == 0)
-                                    <span class="inline-flex items-center justify-center w-6 h-6 bg-yellow-400 text-white rounded-full text-xs font-black">1</span>
-                                @elseif($i == 1)
-                                    <span class="inline-flex items-center justify-center w-6 h-6 bg-gray-400 text-white rounded-full text-xs font-black">2</span>
-                                @elseif($i == 2)
-                                    <span class="inline-flex items-center justify-center w-6 h-6 bg-orange-400 text-white rounded-full text-xs font-black">3</span>
-                                @else
-                                    <span class="text-sm font-bold text-gray-400">{{ $i + 1 }}</span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-3">
-                                <div class="font-bold text-sm text-gray-800">{{ $item->product->product_name ?? '-' }}</div>
-                                <div class="text-[10px] text-gray-400 mt-0.5">{{ $item->product->category->category_name ?? '-' }}</div>
-                            </td>
-                            <td class="px-6 py-3 text-center">
-                                <span class="text-sm font-black text-blue-600">{{ number_format($item->total_qty) }}</span>
-                                <span class="text-[10px] text-gray-400"> pcs</span>
-                            </td>
-                            <td class="px-6 py-3 text-right">
-                                <span class="text-sm font-black text-gray-800">Rp {{ number_format($item->total_revenue, 0, ',', '.') }}</span>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="4" class="px-6 py-12 text-center text-gray-400 italic">
-                                Belum ada data penjualan
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
 
     {{-- Table Detail Orders --}}
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">

@@ -48,7 +48,7 @@
                     <span class="flex-1">Pesanan Masuk</span>
                     <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded-md" 
                           style="background: #2563eb; color: #fff; letter-spacing: 0.05em; box-shadow: 0 2px 6px rgba(37,99,235,0.4);">
-                        {{ \App\Models\Orders::where('status', 'paid')->count() }}
+                        {{ \App\Models\Orders::whereIn('status', ['paid', 'processing'])->count() }}
                     </span>
                 </a>
 

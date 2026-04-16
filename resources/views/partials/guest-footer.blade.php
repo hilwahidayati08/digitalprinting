@@ -87,9 +87,12 @@
                 &copy; {{ date('Y') }} <span class="text-blue-500 font-bold">{{ $settings->site_name ?? 'CetakKilat' }}</span>
             </p>
             <div class="flex gap-6 text-[9px] font-bold uppercase tracking-widest text-gray-600">
-                <a href="#" class="hover:text-gray-300 transition-colors">Privacy Policy</a>
-                <a href="#" class="hover:text-gray-300 transition-colors">Terms of Service</a>
-            </div>
+                <a href="#" class="hover:text-gray-300 transition-colors">Keamanan</a>
+<a href="https://wa.me/{{ $settings->whatsapp ?? '6285810761209' }}" 
+   target="_blank" 
+   class="hover:text-gray-300 transition-colors">
+   Bantuan
+</a>            </div>
         </div>
 
     </div>

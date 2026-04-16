@@ -318,7 +318,8 @@
     $estimasi = $order->estimated_arrival
         ? \Carbon\Carbon::parse($order->estimated_arrival)->format('d-m-Y')
         : $order->created_at->addDays(3)->format('d-m-Y');
-
+        
+//akumulasi 1 pcs 100gram
     $totalWeight = $order->items->sum(fn($i) => ($i->qty ?? 1) * 100);
 @endphp
 
@@ -327,8 +328,7 @@
     {{-- ── TOP HEADER ─────────────────────────────────────── --}}
     <div class="top-header">
         <div class="top-header-left">
-            <div class="logo-toko">Print<span>Pro</span></div>
-            <div class="logo-sub">Official Store</div>
+            <div class="logo-toko">Cetak<span>Kilat</span></div>
         </div>
         <div class="top-header-right">
             <div class="kurir-name">{{ $kurirDisplay }}</div>

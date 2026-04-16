@@ -1,57 +1,13 @@
-<style>
-    .prod-card { background: #fff; border-radius: 20px; border: 1.5px solid #ebebeb; overflow: hidden; display: flex; flex-direction: column; transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease; height: 100%; }
-    .prod-card:hover { transform: translateY(-6px); box-shadow: 0 20px 50px -10px rgba(0,0,0,.13); border-color: #dbeafe; }
-    .prod-img-wrap { position: relative; width: 100%; aspect-ratio: 4/3; overflow: hidden; background: #f1f5f9; flex-shrink: 0; }
-    .prod-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s ease; }
-    .prod-card:hover .prod-img-wrap img { transform: scale(1.07); }
-    .prod-img-wrap::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.18) 0%, transparent 45%); pointer-events: none; opacity: 0; transition: opacity .3s ease; }
-    .prod-card:hover .prod-img-wrap::after { opacity: 1; }
-    .prod-badge { position: absolute; top: 12px; left: 12px; z-index: 5; background: rgba(37,99,235,.92); color: #fff; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 999px; letter-spacing: .06em; text-transform: uppercase; backdrop-filter: blur(4px); box-shadow: 0 2px 8px rgba(37,99,235,.3); }
-    .prod-img-count { position: absolute; bottom: 10px; right: 10px; z-index: 5; background: rgba(0,0,0,.5); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 999px; backdrop-filter: blur(4px); display: flex; align-items: center; gap: 4px; }
-    .prod-wish { position: absolute; top: 10px; right: 10px; z-index: 5; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.88); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(6px); box-shadow: 0 2px 8px rgba(0,0,0,.08); opacity: 0; transition: opacity .2s ease, transform .2s ease; color: #94a3b8; }
-    .prod-card:hover .prod-wish { opacity: 1; }
-    .prod-wish:hover { transform: scale(1.12); color: #ef4444; }
-    .prod-body { padding: 14px 16px 18px; display: flex; flex-direction: column; flex: 1; }
-    .prod-name { font-size: 13px; font-weight: 800; color: #111; line-height: 1.35; margin-bottom: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .prod-desc { font-size: 11px; color: #64748b; line-height: 1.55; margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex: 1; }
-    .prod-rating { display: flex; align-items: center; gap: 5px; margin-bottom: 12px; flex-wrap: wrap; }
-    .prod-stars { color: #f59e0b; font-size: 10px; letter-spacing: 1px; }
-    .prod-rating-txt { font-size: 10px; color: #94a3b8; font-weight: 600; }
-    .prod-price-row { display: flex; align-items: baseline; gap: 4px; margin-bottom: 14px; flex-wrap: wrap; }
-    .prod-price { font-size: 16px; font-weight: 900; color: #1d4ed8; line-height: 1; }
-    .prod-unit { font-size: 10px; color: #94a3b8; font-weight: 600; }
-    .prod-btn { display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%; padding: 10px 0; background: #2563eb; color: #fff; border: none; border-radius: 14px; cursor: pointer; font-size: 12px; font-weight: 700; letter-spacing: .02em; text-decoration: none; transition: background .2s, transform .18s, box-shadow .2s; box-shadow: 0 4px 14px rgba(37,99,235,.25); }
-    .prod-btn:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,.35); color: #fff; }
-    .prod-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
-    .prod-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #f1f5f9, #e2e8f0); color: #cbd5e1; }
-    .see-all { display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; background: #fff; border: 2px solid #2563eb; color: #2563eb; border-radius: 999px; font-weight: 800; font-size: 13px; text-decoration: none; transition: all .22s ease; box-shadow: 0 2px 8px rgba(37,99,235,.08); }
-    .see-all:hover { background: #2563eb; color: #fff; box-shadow: 0 8px 24px rgba(37,99,235,.28); transform: translateY(-2px); }
-    .see-all svg { width: 16px; height: 16px; transition: transform .22s; }
-    .see-all:hover svg { transform: translateX(4px); }
-    .prod-card-wrap { opacity: 0; transform: translateY(24px); animation: cardUp .5s ease forwards; }
-    @keyframes cardUp { to { opacity:1; transform:none; } }
-    .prod-card-wrap:nth-child(1){animation-delay:.05s}
-    .prod-card-wrap:nth-child(2){animation-delay:.10s}
-    .prod-card-wrap:nth-child(3){animation-delay:.15s}
-    .prod-card-wrap:nth-child(4){animation-delay:.20s}
-    .prod-card-wrap:nth-child(5){animation-delay:.25s}
-    .prod-card-wrap:nth-child(6){animation-delay:.30s}
-    .prod-card-wrap:nth-child(7){animation-delay:.35s}
-    .prod-card-wrap:nth-child(8){animation-delay:.40s}
-</style>
-
 <section class="relative overflow-hidden bg-gradient-to-br from-primary-50 via-white to-secondary-50 py-12 md:py-16 lg:py-24">
     <div class="max-w-7xl mx-auto px-5 sm:px-6 md:px-8 lg:px-12">
         <div class="text-center mb-10 md:mb-12">
             <div class="flex justify-center">
                 <span class="inline-flex items-center gap-2 px-5 py-2.5 bg-white rounded-full shadow-lg border border-neutral-100 mb-6">
                     <span class="flex w-2.5 h-2.5 bg-primary-600 rounded-full animate-pulse"></span>
-                    <span class="text-xs sm:text-sm font-bold tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-secondary-600 uppercase">
-                        PRODUK PILIHAN
-                    </span>
+                    <span class="text-xs sm:text-sm font-bold tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-secondary-600 uppercase">PRODUK PILIHAN</span>
                 </span>
             </div>
-            <h2 class="text-2xl sm:text-3xl md:text-4xl font-black text-neutral-900 mb-3 leading-tight">Produk <span class="text-primary-600">Unggulan</span> Kami</h2>
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-black text-neutral-900 mb-3 leading-tight">Produk <span class="text-primary-600">Terlaris</span> Kami</h2>
             <p class="text-sm sm:text-base text-neutral-600 max-w-2xl mx-auto leading-relaxed px-4">Kualitas cetak terbaik untuk berbagai kebutuhan bisnis dan personal Anda.</p>
         </div>
 
@@ -63,6 +19,7 @@
                     $avgRating = $product->ratings->avg('rating') ?: 0;
                     $totalReviews = $product->ratings->count();
                     $fullStars = floor($avgRating);
+                    $price = $product->formatted_price ?? 'Rp '.number_format($product->price,0,',','.');
                 @endphp
                 <div class="prod-card-wrap">
                     <div class="prod-card">
@@ -92,27 +49,33 @@
                         </div>
                         <div class="prod-body">
                             <h3 class="prod-name">{{ Str::limit($product->product_name, 35) }}</h3>
-                            <p class="prod-desc">{{ strip_tags(Str::limit($product->description, 60)) ?: 'Produk berkualitas tinggi dengan hasil cetak tajam dan warna akurat.' }}</p>
-                            <div class="prod-rating">
-                                <span class="prod-stars" style="color: #fbbf24;">
+                            
+                            {{-- RATING DENGAN SVG BINTANG --}}
+                            <div class="flex items-center gap-2 mt-1 mb-2">
+                                <div class="flex items-center gap-0.5">
                                     @for ($i = 1; $i <= 5; $i++)
                                         @if ($i <= $fullStars)
-                                            ★
+                                            <svg class="w-3.5 h-3.5 text-yellow-400 fill-current" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                            </svg>
                                         @else
-                                            ☆
+                                            <svg class="w-3.5 h-3.5 text-gray-300 fill-current" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                            </svg>
                                         @endif
                                     @endfor
-                                </span>
-                                <span class="prod-rating-txt">
-                                    {{ number_format($avgRating, 1) }}
-                                    <span style="color: #cbd5e1; margin: 0 4px;">•</span>
-                                    {{ $totalReviews }}
-                                </span>
+                                </div>
+                                <span class="text-xs font-semibold text-gray-700">{{ number_format($avgRating, 1) }}</span>
+                                <span class="text-xs text-gray-400">• {{ $totalReviews }} ulasan</span>
                             </div>
+
+                            <p class="prod-desc">{{ strip_tags(Str::limit($product->description, 60)) ?: 'Produk berkualitas tinggi dengan hasil cetak tajam dan warna akurat.' }}</p>
+                            
                             <div class="prod-price-row">
-                                <span class="prod-price">{{ $product->formatted_price ?? 'Rp '.number_format($product->price,0,',','.') }}</span>
+                                <span class="prod-price">{{ $price }}</span>
                                 <span class="prod-unit">/ {{ $product->unit->unit_name ?? 'pcs' }}</span>
                             </div>
+                            
                             <a href="{{ url('products/' . $product->slug) }}" class="prod-btn">
                                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -125,12 +88,12 @@
                 </div>
             @empty
                 <div class="col-span-full py-12 sm:py-16 text-center">
-                    <div style="width:64px;height:64px;background:#f1f5f9;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
                         <svg width="28" height="28" fill="none" stroke="#cbd5e1" stroke-width="1.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                         </svg>
                     </div>
-                    <p style="color:#94a3b8;font-weight:600;">Belum ada produk tersedia.</p>
+                    <p class="text-slate-500 font-semibold">Belum ada produk tersedia.</p>
                 </div>
             @endforelse
         </div>

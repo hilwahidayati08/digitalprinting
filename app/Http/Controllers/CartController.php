@@ -158,7 +158,106 @@ public function add(Request $request)
         return back()->with('error', $e->getMessage());
     }
 }
+public function buyNow(Request $request)
+{
+    $request->validate([
+        'product_id'      => 'required|exists:products,product_id',
+        'qty'             => 'required|integer|min:1',
+        'width_cm'        => 'nullable|numeric|min:0',
+        'height_cm'       => 'nullable|numeric|min:0',
+        'total_yield_pcs' => 'nullable|integer',
+        'notes'           => 'nullable|string|max:1000',
+    ]);
 
+    DB::beginTransaction();
+
+    try {
+        // Cari atau buat cart sementara (tapi nanti akan langsung di-checkout)
+        $cart = Carts::firstOrCreate([
+            'user_id' => auth()->id()
+        ]);
+
+        $product = Products::with(['category', 'material'])->findOrFail($request->product_id);
+
+        $width    = (float) $request->width_cm;
+        $height   = (float) $request->height_cm;
+        $qty      = (int) $request->qty;
+        $calcType = $product->category->calc_type;
+        $material = $product->material;
+
+        // Validasi stok (sama seperti di add())
+        if ($material && $material->stock <= 0) {
+            DB::rollBack();
+            return back()->with('error', 'Stok material habis, produk tidak dapat dipesan.');
+        }
+
+        if ($material && $calcType === 'stiker') {
+            $matW    = (float) $material->width_cm;
+            $matH    = (float) $material->height_cm;
+            $spacing = ((float) ($material->spacing_mm ?? 0)) / 10;
+
+            if ($matW > 0 && $matH > 0 && $width > 0 && $height > 0) {
+                if ($width <= $matW && $height <= $matH) {
+                    $cols1      = floor($matW / ($width  + $spacing));
+                    $rows1      = floor($matH / ($height + $spacing));
+                    $cols2      = floor($matW / ($height + $spacing));
+                    $rows2      = floor($matH / ($width  + $spacing));
+                    $yieldSheet = max($cols1 * $rows1, $cols2 * $rows2);
+                    $maxQty     = $yieldSheet > 0 ? $material->stock * $yieldSheet : $material->stock;
+                } else {
+                    $maxQty = $material->stock;
+                }
+            } else {
+                $maxQty = $material->stock;
+            }
+
+            if ($qty > $maxQty) {
+                DB::rollBack();
+                return back()->with('error', "Jumlah melebihi stok tersedia. Maksimal {$maxQty} pcs.");
+            }
+        } elseif ($material && $qty > $material->stock) {
+            DB::rollBack();
+            return back()->with('error', "Jumlah melebihi stok tersedia. Tersedia {$material->stock} lembar.");
+        }
+
+        // Hitung subtotal
+        $price    = $product->price;
+        $subtotal = 0;
+
+        if ($calcType === 'luas' && $width > 0 && $height > 0) {
+            $luasM2      = ($width * $height) / 10000;
+            $luasHitung  = max($luasM2, 1);
+            $subtotal    = $luasHitung * $price * $qty;
+        } else {
+            $subtotal = $price * $qty;
+        }
+
+        // Hapus semua item di cart (biar cuma 1 item untuk buy now)
+        CartItems::where('cart_id', $cart->cart_id)->delete();
+
+        // Buat item baru
+        CartItems::create([
+            'cart_id'         => $cart->cart_id,
+            'product_id'      => $product->product_id,
+            'width_cm'        => $width,
+            'height_cm'       => $height,
+            'qty'             => $qty,
+            'price'           => $price,
+            'total_yield_pcs' => $request->total_yield_pcs,
+            'subtotal'        => $subtotal,
+            'notes'           => $request->notes,
+        ]);
+
+        DB::commit();
+
+        // Langsung redirect ke halaman checkout
+        return redirect()->route('checkout.index');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->with('error', $e->getMessage());
+    }
+}
 public function update(Request $request, $id)
 {
     $request->validate([

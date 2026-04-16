@@ -90,7 +90,12 @@ Route::resource('heros', HeroController::class)->except(['edit', 'create', 'show
 
     Route::delete('/admin/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
 
-    Route::resource('portofolios', PortofolioController::class)->except(['show, index']);
+    Route::get('/admin/portofolios', [PortofolioController::class, 'indexAdmin'])->name('portofolios.index');
+    Route::get('/admin/portofolios/create', [PortofolioController::class, 'create'])->name('portofolios.create');
+    Route::post('/admin/portofolios', [PortofolioController::class, 'store'])->name('portofolios.store');
+    Route::get('/admin/portofolios/{id}/edit', [PortofolioController::class, 'edit'])->name('portofolios.edit');
+    Route::put('/admin/portofolios/{id}', [PortofolioController::class, 'update'])->name('portofolios.update');
+    Route::delete('/admin/portofolios/{id}', [PortofolioController::class, 'destroy'])->name('portofolios.destroy');
     Route::resource('users', UserController::class)->except(['editProfile', 'updateProfile', 'show']);
     Route::resource('services', ServiceController::class);
     Route::resource('stocklogs', StockLogsController::class);
@@ -195,3 +200,4 @@ Route::post('/midtrans/notification', [OrderController::class, 'handleNotificati
     Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
     Route::delete('/notifications/clear-read', [NotificationController::class, 'destroyRead'])->name('notifications.destroyRead');
     Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount'])->name('notifications.unreadCount');
+Route::post('/cart/buy-now', [CartController::class, 'buyNow'])->name('cart.buyNow')->middleware('auth');

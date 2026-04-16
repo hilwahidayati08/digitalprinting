@@ -32,25 +32,61 @@
             </div>
         </div>
 
-        {{-- 2. STATS CARDS --}}
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
-                <p class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Total Pesanan</p>
-                <p class="text-2xl font-black text-gray-900">{{ $orders->total() }} <span class="text-xs font-bold text-gray-400">Order</span></p>
-            </div>
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 [border-left:4px_solid_#f59e0b]">
-                <p class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Menunggu Bayar</p>
-                <p class="text-2xl font-black text-amber-600">{{ $orders->where('status', 'pending')->count() }}</p>
-            </div>
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 [border-left:4px_solid_#3b82f6]">
-                <p class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Sedang Diproses</p>
-                <p class="text-2xl font-black text-blue-600">{{ $orders->where('status', 'processing')->count() }}</p>
-            </div>
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 [border-left:4px_solid_#22c55e]">
-                <p class="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Selesai</p>
-                <p class="text-2xl font-black text-green-600">{{ $orders->where('status', 'completed')->count() }}</p>
-            </div>
+{{-- 1.5 FILTER STATUS TABS --}}
+        <div class="flex items-center gap-2 mb-6 flex-wrap">
+            @php
+                $statuses = [
+                    'all'          => ['label' => 'Semua',         'color' => 'gray'],
+                    'paid'         => ['label' => 'Perlu Diproses', 'color' => 'amber'],
+                    'processing'   => ['label' => 'Produksi',       'color' => 'blue'],
+                    'ready_pickup' => ['label' => 'Siap Ambil',     'color' => 'teal'],
+                    'shipped'      => ['label' => 'Dikirim',        'color' => 'indigo'],
+                    'pending'      => ['label' => 'Belum Bayar',    'color' => 'orange'],
+                    'completed'    => ['label' => 'Selesai',        'color' => 'green'],
+                    'cancelled'    => ['label' => 'Dibatalkan',     'color' => 'red'],
+                ];
+
+                $colorMap = [
+                    'gray'   => ['active' => 'bg-gray-800 text-white border-gray-800',    'inactive' => 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'],
+                    'amber'  => ['active' => 'bg-amber-500 text-white border-amber-500',  'inactive' => 'bg-white text-amber-600 border-amber-200 hover:border-amber-400'],
+                    'blue'   => ['active' => 'bg-blue-500 text-white border-blue-500',    'inactive' => 'bg-white text-blue-600 border-blue-200 hover:border-blue-400'],
+                    'teal'   => ['active' => 'bg-teal-500 text-white border-teal-500',    'inactive' => 'bg-white text-teal-600 border-teal-200 hover:border-teal-400'],
+                    'indigo' => ['active' => 'bg-indigo-500 text-white border-indigo-500','inactive' => 'bg-white text-indigo-600 border-indigo-200 hover:border-indigo-400'],
+                    'orange' => ['active' => 'bg-orange-500 text-white border-orange-500','inactive' => 'bg-white text-orange-600 border-orange-200 hover:border-orange-400'],
+                    'green'  => ['active' => 'bg-green-500 text-white border-green-500',  'inactive' => 'bg-white text-green-600 border-green-200 hover:border-green-400'],
+                    'red'    => ['active' => 'bg-red-500 text-white border-red-500',      'inactive' => 'bg-white text-red-600 border-red-200 hover:border-red-400'],
+                ];
+
+                $currentStatus = request('status', 'all');
+
+                $counts = [
+                    'all'          => \App\Models\Orders::count(),
+                    'paid'         => \App\Models\Orders::where('status', 'paid')->count(),
+                    'processing'   => \App\Models\Orders::where('status', 'processing')->count(),
+                    'ready_pickup' => \App\Models\Orders::where('status', 'ready_pickup')->count(),
+                    'shipped'      => \App\Models\Orders::where('status', 'shipped')->count(),
+                    'pending'      => \App\Models\Orders::where('status', 'pending')->count(),
+                    'completed'    => \App\Models\Orders::where('status', 'completed')->count(),
+                    'cancelled'    => \App\Models\Orders::where('status', 'cancelled')->count(),
+                ];
+            @endphp
+
+            @foreach($statuses as $key => $meta)
+                @php
+                    $isActive = $currentStatus === $key;
+                    $c = $colorMap[$meta['color']];
+                @endphp
+                <a href="{{ route('admin.orders.index', array_merge(request()->except('status', 'page'), $key !== 'all' ? ['status' => $key] : [])) }}"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wide border transition-all duration-150 {{ $isActive ? $c['active'] : $c['inactive'] }}">
+                    {{ $meta['label'] }}
+                    <span class="text-[10px] font-black {{ $isActive ? 'opacity-80' : 'opacity-60' }}">
+                        {{ $counts[$key] }}
+                    </span>
+                </a>
+            @endforeach
         </div>
+
+        {{-- 2. STATS CARDS --}}
 
         {{-- 3. TABEL DATA --}}
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">

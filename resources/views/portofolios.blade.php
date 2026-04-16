@@ -302,6 +302,7 @@
     </div>
 </div>
 
+
 {{-- MAIN CONTENT --}}
 <div class="-mt-6 md:-mt-8 relative z-30">
     <div class="container mx-auto px-3 md:px-4 max-w-6xl">
@@ -354,12 +355,11 @@
             <div class="mb-6 md:mb-8 flex justify-between items-center flex-wrap gap-2">
                 <div>
                     <h2 class="text-lg md:text-xl font-extrabold text-slate-800">
-                        {{ request('search') ? 'Hasil Pencarian Project' : 'Semua Hasil Karya' }}
+                        {{ request('search') ? 'Hasil Pencarian' : (request('category') ? 'Kategori Terpilih' : 'Semua Koleksi') }}
                     </h2>
-                    <div class="flex items-center gap-2 mt-1">
-                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                        <p class="text-slate-500 text-xs font-medium">{{ $portofolios->total() }} Project Selesai</p>
-                    </div>
+                    <p class="text-slate-500 text-xs mt-1 font-medium">
+                        Menampilkan {{ $portofolios->count() }} Produk
+                    </p>
                 </div>
             </div>
 
@@ -417,10 +417,6 @@
                     @endforeach
                 </div>
 
-                {{-- Pagination --}}
-                <div class="mt-10 md:mt-16">
-                    {{ $portofolios->withQueryString()->links() }}
-                </div>
             @else
                 {{-- Empty State --}}
                 <div class="bg-white rounded-2xl md:rounded-3xl py-16 md:py-24 text-center border border-dashed border-slate-200">

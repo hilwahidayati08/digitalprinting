@@ -25,7 +25,7 @@ public function update(Request $request, Heros $hero)
         'photo'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
     ]);
 
-    $data              = $request->only(['label', 'headline', 'subheadline', 'button_link']);
+    $data              = $request->only(['label', 'headline', 'subheadline']);
     $data['is_active'] = $request->has('is_active');
 
     if ($request->hasFile('photo')) {

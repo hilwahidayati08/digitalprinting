@@ -411,7 +411,7 @@
                         {{ request('search') ? 'Hasil Pencarian' : (request('category') ? 'Kategori Terpilih' : 'Semua Koleksi') }}
                     </h2>
                     <p class="text-slate-500 text-xs mt-1 font-medium">
-                        Menampilkan {{ $products->total() }} Produk
+                        Menampilkan {{ $products->count() }} Produk
                     </p>
                 </div>
             </div>
@@ -498,10 +498,6 @@
                     @endforeach
                 </div>
 
-                {{-- Pagination --}}
-                <div class="mt-10 md:mt-16">
-                    {{ $products->withQueryString()->links() }}
-                </div>
             @else
                 {{-- Empty State --}}
                 <div class="bg-white rounded-2xl md:rounded-3xl py-16 md:py-24 text-center border border-dashed border-slate-200">
